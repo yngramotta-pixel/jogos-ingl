@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CapyCode: Rumo ao Parque!</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #eef1f6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        h1 { color: #2c3e50; margin-bottom: 10px; }
+        .container { display: flex; gap: 30px; margin-top: 20px; }
+        
+        /* Grid do Jogo */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(5, 70px);
+            grid-template-rows: repeat(5, 70px);
+            gap: 5px;
+            background-color: #bdc3c7;
+            padding: 10px;
+            border-radius: 10px;
+        }
+        .cell {
+            background-color: #fff;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .start { background-color: #2ecc71; }
+        .finish { background-color: #3498db; }
+        .obstacle { background-color: #e74c3c; }
+        
+        /* Direção da Capivara */
+        .capy { font-size: 35px; transition: transform 0.3s; }
+        .dir-up { transform: rotate(0deg); }
+        .dir-right { transform: rotate(90deg); }
+        .dir-down { transform: rotate(180deg); }
+        .dir-left { transform: rotate(270deg); }
+
+        /* Painel de Controle */
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 300px;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 10px;
+            border-radius: 5px;
+            border: 2px solid #bdc3c7;
+            font-family: monospace;
+            font-size: 14px;
+            resize: none;
+        }
+        button {
+            padding: 12px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover { background-color: #27ae60; }
+        .help {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        #message {
+            margin-top: 15px;
+            font-weight: bold;
+            font-size: 18px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🦫 CapyCode: Siga o Algoritmo!</h1>
+    <p>Ajude a capivara a chegar ao parque (🌳) sem bater nos obstáculos (🚗)!</p>
+
+    <div class="container">
+        <div class="grid" id="grid"></div>
+
+        <div class="controls">
+            <div class="help">
+                <strong>📜 Comandos permitidos:</strong><br>
+                • <code>go straight X</code> (Ex: go straight 2)<br>
+                • <code>go back X</code><br>
+                • <code>turn right</code><br>
+                • <code>turn left</code><br>
+                • <code>stop</code> (Coloque no final!)
+            </div>
+            <textarea id="code" placeholder="Digite seu algoritmo aqui...&#10;Exemplo:&#10;go straight 2&#10;turn right&#10;stop"></textarea>
+            <button onclick="runAlgorithm()">Executar Algoritmo ▶</button>
+            <div id="message"></div>
+        </div>
+    </div>
+
+    <script>
+        // Configurações iniciais
+        const gridSize = 5;
+        let capyPos = { x: 0, y: 0 };
+        let capyDir = 'down'; // 'up', 'right', 'down', 'left'
+        const finishPos = { x: 4, y: 4 };
+        
+        // Obstáculos fixos (x, y)
+        const obstacles = [
+            {x: 1, y: 1}, {x: 3, y: 1}, {x: 2, y: 3}
+        ];
+
+        const gridElement = document.getElementById('grid');
+        const messageElement = document.getElementById('message');
+
+        // Inicializa o tabuleiro
+        function drawGrid() {
+            gridElement.innerHTML = '';
+            for (let y = 0; y < gridSize; y++) {
+                for (let x = 0; x < gridSize; x++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    
+                    if (x === 0 && y === 0) cell.classList.add('start');
+                    if (x === finishPos.x && y === finishPos.y) {
+                        cell.classList.add('finish');
+                        cell.innerHTML = '🌳';
+                    }
+                    
+                    // Desenha obstáculos
+                    if (obstacles.some(o => o.x === x && o.y === y)) {
+                        cell.classList.add('obstacle');
+                        cell.innerHTML = '🚗';
+                    }
+
+                    // Desenha a Capivara
+                    if (x === capyPos.x && y === capyPos.y) {
+                        cell.innerHTML = `<span class="capy dir-${capyDir}">🦫</span>`;
+                    }
+
+                    gridElement.appendChild(cell);
+                }
+            }
+        }
+
+        // Função para rodar o algoritmo passo a passo
+        async function runAlgorithm() {
+            // Reset do estado inicial
+            capyPos = { x: 0, y: 0 };
+            capyDir = 'down';
+            messageElement.innerText = "Processando instruções...";
+            drawGrid();
+
+            const code = document.getElementById('code').value.toLowerCase().split('\n');
+            
+            for (let line of code) {
+                line = line.trim();
+                if (!line) continue;
+
+                await new Promise(resolve => setTimeout(resolve, 800)); // Delay para animação
+
+                if (line.startsWith('go straight') || line.startsWith('go back')) {
+                    const parts = line.split(' ');
+                    const steps = parseInt(parts[2]) || 1;
+                    const directionMultiplier = line.startsWith('go straight') ? 1 : -1;
+                    
+                    moveCapy(steps * directionMultiplier);
+                } 
+                else if (line === 'turn right') {
+                    turn('right');
+                } 
+                else if (line === 'turn left') {
+                    turn('left');
+                } 
+                else if (line === 'stop') {
+                    checkWinCondition();
+                    return;
+                } 
+                else {
+                    messageElement.innerHTML = `<span style="color:red">Erro de sintaxe: "${line}" não reconhecido.</span>`;
+                    return;
+                }
+
+                // Verifica colisão durante o movimento
+                if (checkCollision()) return;
+                drawGrid();
+            }
+            
+            messageElement.innerHTML = `<span style="color:orange">O algoritmo terminou sem o comando 'stop'.</span>`;
+        }
+
+        function turn(side) {
+            const dirs = ['up', 'right', 'down', 'left'];
+            let idx = dirs.indexOf(capyDir);
+            if (side === 'right') idx = (idx + 1) % 4;
+            if (side === 'left') idx = (idx + 3) % 4;
+            capyDir = dirs[idx];
+        }
+
+        function moveCapy(steps) {
+            if (capyDir === 'up') capyPos.y -= steps;
+            if (capyDir === 'down') capyPos.y += steps;
+            if (capyDir === 'right') capyPos.x += steps;
+            if (capyDir === 'left') capyPos.x -= steps;
+        }
+
+        function checkCollision() {
+            // Fora do mapa
+            if (capyPos.x < 0 || capyPos.x >= gridSize || capyPos.y < 0 || capyPos.y >= gridSize) {
+                messageElement.innerHTML = `<span style="color:red">💥 Fora do mapa! A capivara se perdeu.</span>`;
+                return true;
+            }
+            // Bateu no obstáculo
+            if (obstacles.some(o => o.x === capyPos.x && o.y === capyPos.y)) {
+                messageElement.innerHTML = `<span style="color:red">💥 Cuidado com o trânsito! Batida!</span>`;
+                return true;
+            }
+            return false;
+        }
+
+        function checkWinCondition() {
+            if (capyPos.x === finishPos.x && capyPos.y === finishPos.y) {
+                messageElement.innerHTML = `<span style="color:green">🎉 Vitória! A capivara chegou ao parque e está feliz! 🦫❤️</span>`;
+            } else {
+                messageElement.innerHTML = `<span style="color:red">🛑 Parou no lugar errado! Tente ajustar o algoritmo.</span>`;
+            }
+        }
+
+        // Desenha o jogo pela primeira vez
+        drawGrid();
+    </script>
+</body>
+</html>
