@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<!-- saved from url=(0063)file:///C:/Users/yngra/Downloads/gemini-code-1779143501742.html -->
+<html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Bus Safety Academy</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 10px;
+        }
+        .header h1 { color: #f1c40f; font-size: 26px; text-shadow: 0 3px 6px rgba(0,0,0,0.5); text-align: center;}
+        
+        .stats-bar {
+            display: flex;
+            gap: 15px;
+            background: #1f2937;
+            padding: 12px 25px;
+            border-radius: 30px;
+            margin: 10px 0;
+            border: 2px solid #374151;
+            font-weight: bold;
+            font-size: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        .fuel-txt { color: #ff4757; }
+        .star-txt { color: #ffa502; }
+        .pass-txt { color: #2ed573; }
+
+        .game-stage {
+            display: flex;
+            gap: 20px;
+            max-width: 950px;
+            width: 100%;
+            background: #2d3748;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .map-wrapper {
+            position: relative;
+            background: #1e293b;
+            border: 6px solid #4a5568;
+            border-radius: 15px;
+            padding: 2px;
+        }
+        .map-grid {
+            display: grid;
+            grid-template-columns: repeat(9, 48px);
+            grid-template-rows: repeat(9, 48px);
+            gap: 2px;
+        }
+        .cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            border-radius: 6px;
+        }
+        .cell.road { background-color: #4b5563; border: 1px dashed rgba(255,255,255,0.1); }
+        .cell.building { background-color: #10b981; font-size: 22px; }
+        .cell.bus-stop { background-color: #6b7280; border: 2px solid #eab308; }
+        .cell.obstacle { background-color: #1f2937; color: #ef4444; font-size: 16px; }
+        
+        .cell.traffic-light { font-size: 22px; transition: background-color 0.3s; }
+        .cell.traffic-light.green-state { background-color: #059669; border: 2px solid #10b981; }
+        .cell.traffic-light.red-state { background-color: #dc2626; border: 2px solid #ef4444; }
+
+        .bus-actor {
+            font-size: 26px;
+            position: absolute;
+            z-index: 10;
+            transition: all 0.15s ease-out;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+
+        .side-panel {
+            flex: 1;
+            min-width: 285px;
+            max-width: 340px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background: #1a202c;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid #4a5568;
+        }
+        .nav-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            max-width: 160px;
+            margin: 0 auto;
+        }
+        .nav-btn {
+            background: #3182ce; border: none; color: white; padding: 12px;
+            border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px;
+        }
+        .nav-btn:hover { background: #2b6cb0; }
+        .nav-btn.center { grid-column: 2; }
+        .nav-btn.left { grid-column: 1; grid-row: 2; }
+        .nav-btn.down { grid-column: 2; grid-row: 2; }
+        .nav-btn.right { grid-column: 3; grid-row: 2; }
+
+        .event-log {
+            background: #2d3748; padding: 8px 12px; border-radius: 6px;
+            font-size: 13px; text-align: center; color: #cbd5e0;
+            border-left: 4px solid #eab308; font-style: italic;
+        }
+
+        .quiz-box {
+            background: #2d3748;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 5px solid #eab308;
+            display: none; 
+            flex-direction: column;
+            gap: 10px;
+            min-height: 140px;
+        }
+        .option-btn {
+            background: #4a5568; color: white; border: 1px solid #718096;
+            padding: 10px; border-radius: 6px; cursor: pointer; text-align: left;
+            font-weight: 600; width: 100%; transition: all 0.2s;
+        }
+        .option-btn:hover { background: #718096; }
+
+        .overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); z-index: 100; flex-direction: column;
+            align-items: center; justify-content: center; text-align: center; padding: 20px;
+        }
+        .restart-btn {
+            background: #eab308; color: #000; border: none; padding: 12px 35px;
+            font-size: 16px; font-weight: bold; border-radius: 25px; cursor: pointer; margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>School Bus Safety Academy 🚌</h1>
+        <div class="stats-bar">
+            <span>⛽ Gasolina: <span id="fuel-display" class="fuel-txt">34</span></span>
+            <span>⭐ Estrelas: <span id="stars-display" class="star-txt">90</span></span>
+            <span>👤 Alunos: <span id="pass-display" class="pass-txt">4/4</span></span>
+        </div>
+    </div>
+
+    <div class="game-stage">
+        <div class="map-wrapper">
+            <div class="map-grid" id="map-grid-element"><div class="cell road">🏠</div><div class="cell road"></div><div class="cell road"></div><div class="cell road"></div><div class="cell traffic-light red-state">🔴</div><div class="cell road"></div><div class="cell obstacle">🚧</div><div class="cell building">🌳</div><div class="cell building">🌳</div><div class="cell building">🌳</div><div class="cell building">🌳</div><div class="cell building">🌳</div><div class="cell building">🌳</div><div class="cell building">🌳</div><div class="cell road"></div><div class="cell building">🌳</div><div class="cell building">🌳</div><div class="cell building">🌳</div><div class="cell building">🥖</div><div class="cell bus-stop">🚏</div><div class="cell road"></div><div class="cell traffic-light red-state">🔴</div><div class="cell building">🌳</div><div class="cell road"></div><div class="cell road"></div><div class="cell bus-stop">🚏</div><div class="cell building">🏥</div><div class="cell building">🌳</div><div class="cell road"></div><div class="cell building">🌳</div><div class="cell road"></div><div class="cell building">🌳</div><div class="cell building">🌳</div><div class="cell building">🌳</div><div class="cell road"></div><div class="cell building">🌳</div><div class="cell building">🌳</div><div class="cell road"></div><div class="cell building">🌳</div><div class="cell road"></div><div class="cell road"></div><div class="cell bus-stop">🚏</div><div class="cell road"></div><div class="cell traffic-light red-state">🔴</div><div class="cell building">🌳</div><div class="cell building">🌳</div><div class="cell road"></div><div class="cell building">🌳</div><div class="cell building">🌳</div><div class="cell building">🌳</div><div class="cell building">🌳</div><div class="cell building">🌳</div><div class="cell building">🌳</div><div class="cell building">🌳</div><div class="cell building">⛪</div><div class="cell road"></div><div class="cell road"></div><div class="cell traffic-light red-state">🔴</div><div class="cell road"></div><div class="cell road"></div><div class="cell road"></div><div class="cell road"></div><div class="cell road"></div><div class="cell building">🌳</div><div class="cell building">🌳</div><div class="cell building">🌳</div><div class="cell building">🌳</div><div class="cell building">🌳</div><div class="cell obstacle">🚧</div><div class="cell building">🌳</div><div class="cell building">🌳</div><div class="cell road"></div><div class="cell building">🌳</div><div class="cell building">🌳</div><div class="cell building">🌳</div><div class="cell building">🌳</div><div class="cell building">🌳</div><div class="cell building">🌳</div><div class="cell building">🌳</div><div class="cell building">🌳</div><div class="cell road">🏫</div></div>
+            <div class="bus-actor" id="bus-player" style="top: 402px; left: 402px;">🚌</div>
+        </div>
+
+        <div class="side-panel">
+            <div class="event-log" id="log-box" style="border-left: 4px solid rgb(46, 213, 115);">👤 Aluno embarcou! Direção segura rende +15 Estrelas.</div>
+            
+            <div class="nav-buttons">
+                <button class="nav-btn center" onclick="moveBus(0, -1)">⬆️</button>
+                <button class="nav-btn left" onclick="moveBus(-1, 0)">⬅️</button>
+                <button class="nav-btn down" onclick="moveBus(0, 1)">⬇️</button>
+                <button class="nav-btn right" onclick="moveBus(1, 0)">➡️</button>
+            </div>
+
+            <div class="quiz-box" id="quiz-container" style="display: none;">
+                <div style="font-size: 11px; color: #eab308; font-weight: bold;">⛽ REFUEL QUIZ! (Abasteça o Ônibus)</div>
+                <div id="question-text" style="font-weight: bold; font-size: 14px; margin: 4px 0; line-height: 1.4;">Where do you buy fresh bread and cakes?<br><span style="color: #a0aec0; font-size: 12px; font-weight: normal;">(Onde você compra pão fresco e bolos?)</span></div>
+                <div id="options-container" style="display: flex; flex-direction: column; gap: 6px;"><button class="option-btn">Library 📚</button><button class="option-btn">Bakery 🥖</button><button class="option-btn">Hospital 🏥</button></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="overlay" id="end-screen" style="display: flex;">
+        <h1 id="end-title" style="font-size: 36px; margin-bottom: 10px; color: rgb(46, 213, 115);">🎉 ROTA FINALIZADA!</h1>
+        <p id="end-desc" style="font-size: 18px; color: #a0aec0; max-width: 500px;">Parabéns! Você seguiu as leis, entregou 4 alunos e acumulou 90 estrelas!</p>
+        <button class="restart-btn" onclick="window.location.reload()">Tentar Novamente 🔄</button>
+    </div>
+
+    <script>
+        // CIRCUITO BLINDADO: Agora as ruas ('R', 'T', 'S') formam um caminho contínuo obrigatório, impossibilitando desvios.
+        const cityMatrix = [
+            ['H', 'R', 'R', 'R', 'T', 'R', 'O', 'B', 'B'],
+            ['B', 'B', 'B', 'B', 'B', 'R', 'B', 'B', 'B'],
+            ['B', 'S', 'R', 'T', 'B', 'R', 'R', 'S', 'B'],
+            ['B', 'R', 'B', 'R', 'B', 'B', 'B', 'R', 'B'],
+            ['B', 'R', 'B', 'R', 'R', 'S', 'R', 'T', 'B'], 
+            ['B', 'R', 'B', 'B', 'B', 'B', 'B', 'B', 'B'], // Bloqueio total na linha 5 para forçar o caminho de volta pela esquerda
+            ['B', 'R', 'R', 'T', 'R', 'R', 'R', 'R', 'R'], // Conexão fluida de asfalto que liga a Church até o lado direito
+            ['B', 'B', 'B', 'B', 'B', 'O', 'B', 'B', 'R'],
+            ['B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'E']  
+        ];
+
+        const busStopQuizzes = {
+            "2,1": { 
+                question: "Where do you buy fresh bread and cakes?<br><span style='color: #a0aec0; font-size: 12px; font-weight: normal;'>(Onde você compra pão fresco e bolos?)</span>", 
+                correct: "Bakery 🥖", 
+                choices: ["Library 📚", "Bakery 🥖", "Hospital 🏥"] 
+            },
+            "2,7": { 
+                question: "Where do you go when you are very sick?<br><span style='color: #a0aec0; font-size: 12px; font-weight: normal;'>(Para onde você vai quando está muito doente?)</span>", 
+                correct: "Hospital 🏥", 
+                choices: ["Hospital 🏥", "Park 🌳", "Airport ✈️"] 
+            },
+            "4,5": { 
+                question: "Where can you buy medicines and vitamins?<br><span style='color: #a0aec0; font-size: 12px; font-weight: normal;'>(Onde você pode comprar remédios e vitaminas?)</span>", 
+                correct: "Drugstore 💊", 
+                choices: ["Bank 🏦", "Drugstore 💊", "School 🏫"] 
+            },
+            "6,3": { // Ajustado para a nova posição da parada da Igreja
+                question: "Where do people go to pray on Sundays?<br><span style='color: #a0aec0; font-size: 12px; font-weight: normal;'>(Aonde as pessoas vão para rezar aos domingos?)</span>", 
+                correct: "Church ⛪", 
+                choices: ["Supermarket 🛒", "Church ⛪", "Gym 🏋️"] 
+            }
+        };
+
+        // Alunos reposicionados estrategicamente no meio das novas calçadas transitáveis
+        let studentPositions = [
+            {x: 3, y: 0, active: true},
+            {x: 5, y: 2, active: true},
+            {x: 1, y: 3, active: true},
+            {x: 5, y: 6, active: true} 
+        ];
+
+        const gridSize = 9;
+        const cellPixels = 48;
+        const gapPixels = 2;
+
+        let busPos = { x: 0, y: 0 };
+        let fuel = 30; // Aumentado um pouco o combustível inicial já que a rota ficou completa e correta
+        let stars = 0;
+        let studentsSaved = 0;
+        let answeredStops = []; 
+        let lockControls = false;
+        let trafficLightsGreen = true;
+
+        function buildCity() {
+            const gridContainer = document.getElementById('map-grid-element');
+            gridContainer.innerHTML = "";
+
+            for (let r = 0; r < gridSize; r++) {
+                for (let c = 0; c < gridSize; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = "cell";
+                    const type = cityMatrix[r][c];
+
+                    if (type === 'R') cell.classList.add('road');
+                    else if (type === 'H') { cell.classList.add('road'); cell.innerText = "🏠"; }
+                    else if (type === 'E') { cell.classList.add('road'); cell.innerText = "🏫"; }
+                    else if (type === 'O') { cell.classList.add('obstacle'); cell.innerText = "🚧"; }
+                    else if (type === 'S') { cell.classList.add('bus-stop'); cell.innerText = "🚏"; }
+                    else if (type === 'T') {
+                        cell.classList.add('traffic-light');
+                        if (trafficLightsGreen) {
+                            cell.classList.add('green-state');
+                            cell.innerText = "🟢";
+                        } else {
+                            cell.classList.add('red-state');
+                            cell.innerText = "🔴";
+                        }
+                    } else {
+                        cell.classList.add('building');
+                        if (r===2 && c===0) cell.innerText = "🥖";
+                        else if (r===2 && c===8) cell.innerText = "🏥";
+                        else if (r===4 && c===5) cell.innerText = "💊";
+                        else if (r===6 && c===0) cell.innerText = "⛪";
+                        else cell.innerText = "🌳";
+                    }
+
+                    let student = studentPositions.find(s => s.x === c && s.y === r && s.active);
+                    if (student) {
+                        let stSpan = document.createElement('span');
+                        stSpan.innerText = "👤";
+                        stSpan.style.position = "absolute";
+                        cell.appendChild(stSpan);
+                    }
+
+                    gridContainer.appendChild(cell);
+                }
+            }
+            updateBusVisual();
+        }
+
+        setInterval(() => {
+            trafficLightsGreen = !trafficLightsGreen;
+            buildCity();
+        }, 4000);
+
+        function updateBusVisual() {
+            const bus = document.getElementById('bus-player');
+            bus.style.top = (busPos.y * (cellPixels + gapPixels) + 2) + "px";
+            bus.style.left = (busPos.x * (cellPixels + gapPixels) + 2) + "px";
+        }
+
+        function moveBus(dx, dy) {
+            if (lockControls || fuel <= 0) return;
+
+            let targetX = busPos.x + dx;
+            let targetY = busPos.y + dy;
+
+            if (targetX < 0 || targetX >= gridSize || targetY < 0 || targetY >= gridSize) return;
+
+            let targetType = cityMatrix[targetY][targetX];
+            if (targetType === 'B' || targetType === 'O') return;
+
+            if (targetType === 'T' && !trafficLightsGreen) {
+                fuel -= 2; 
+                document.getElementById('fuel-display').innerText = fuel;
+                document.getElementById('log-box').innerText = "🚨 Infração de Trânsito! Você passou no sinal vermelho. Multa de -2 Gasolina!";
+                document.getElementById('log-box').style.borderLeft = "4px solid #ff4757";
+            } else if (targetType === 'T' && trafficLightsGreen) {
+                document.getElementById('log-box').innerText = "🟢 Boa condução! Cruzamento feito em segurança no sinal verde.";
+                document.getElementById('log-box').style.borderLeft = "4px solid #2ed573";
+            }
+
+            busPos.x = targetX;
+            busPos.y = targetY;
+            fuel--;
+            document.getElementById('fuel-display').innerText = fuel;
+            updateBusVisual();
+
+            if (Math.random() < 0.15 && targetType === 'R') {
+                document.getElementById('log-box').innerText = "🚧 Trânsito lento à frente. Continue dirigindo com cuidado!";
+                document.getElementById('log-box').style.borderLeft = "4px solid #3182ce";
+            }
+
+            let student = studentPositions.find(s => s.x === busPos.x && s.y === busPos.y && s.active);
+            if (student) {
+                student.active = false;
+                studentsSaved++;
+                stars += 15;
+                document.getElementById('pass-display').innerText = `${studentsSaved}/4`;
+                document.getElementById('stars-display').innerText = stars;
+                document.getElementById('log-box').innerText = "👤 Aluno embarcou! Direção segura rende +15 Estrelas.";
+                document.getElementById('log-box').style.borderLeft = "4px solid #2ed573";
+                buildCity();
+            }
+
+            if (targetType === 'S') {
+                let stopKey = `${targetY},${targetX}`;
+                if (!answeredStops.includes(stopKey)) {
+                    triggerQuiz(stopKey);
+                }
+            }
+
+            if (fuel <= 0 && targetType !== 'E') {
+                showEndGame(false, "Sua gasolina acabou no meio da rua! O ônibus precisou de guincho por falta de combustível.");
+            }
+
+            if (targetType === 'E') {
+                if (studentsSaved > 0) {
+                    showEndGame(true, `Parabéns! Você seguiu as leis, entregou ${studentsSaved} alunos e acumulou ${stars} estrelas!`);
+                } else {
+                    showEndGame(false, "Você chegou à escola, mas o ônibus estava VAZIO! Você esqueceu de recolher os alunos nas calçadas.");
+                }
+            }
+        }
+
+        function triggerQuiz(stopKey) {
+            lockControls = true;
+            const quizData = busStopQuizzes[stopKey];
+            if (!quizData) { lockControls = false; return; }
+
+            const quizBox = document.getElementById('quiz-container');
+            quizBox.style.display = 'flex';
+
+            document.getElementById('question-text').innerHTML = quizData.question;
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = "";
+
+            quizData.choices.forEach(choice => {
+                let btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = choice;
+                btn.onclick = () => checkQuizAnswer(choice, quizData.correct, stopKey);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function checkQuizAnswer(selected, correct, stopKey) {
+            const quizBox = document.getElementById('quiz-container');
+            
+            if (selected === correct) {
+                alert("✨ Correto! Tanque cheio: você ganhou +12 de Gasolina e +10 estrelas!");
+                fuel += 12;
+                stars += 10;
+            } else {
+                alert(`❌ Incorreto! Resposta errada. Perdeu -3 de combustível dando voltas. A resposta certa era: ${correct}`);
+                fuel -= 3;
+            }
+
+            document.getElementById('fuel-display').innerText = fuel;
+            document.getElementById('stars-display').innerText = stars;
+            
+            answeredStops.push(stopKey);
+            quizBox.style.display = 'none';
+            lockControls = false;
+            
+            if(fuel <= 0) {
+                showEndGame(false, "A gasolina acabou logo após sair do posto de controle!");
+            }
+        }
+
+        function showEndGame(isWin, msg) {
+            const screen = document.getElementById('end-screen');
+            document.getElementById('end-title').innerText = isWin ? "🎉 ROTA FINALIZADA!" : "💥 FIM DE JOGO";
+            document.getElementById('end-title').style.color = isWin ? "#2ed573" : "#ff4757";
+            document.getElementById('end-desc').innerText = msg;
+            screen.style.display = 'flex';
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) e.preventDefault();
+            if(e.key === "ArrowUp") moveBus(0, -1);
+            if(e.key === "ArrowDown") moveBus(0, 1);
+            if(e.key === "ArrowLeft") moveBus(-1, 0);
+            if(e.key === "ArrowRight") moveBus(1, 0);
+        });
+
+        buildCity();
+    </script>
+
+</body></html>
