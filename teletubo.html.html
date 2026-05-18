@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teletube Escape: Robot Rescue</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1a1a24;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .game-header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .game-header h1 { color: #f1c40f; font-size: 24px; text-shadow: 0 0 10px rgba(241,196,15,0.4); }
+        
+        .main-stage {
+            display: flex;
+            gap: 30px;
+            max-width: 750px;
+            width: 100%;
+            background: #2d2d3a;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            align-items: center;
+            flex-wrap: wrap; /* Melhora visual em celulares */
+            justify-content: center;
+        }
+
+        /* O Teletubo */
+        .tube-container {
+            position: relative;
+            width: 160px;
+            height: 280px;
+            background: linear-gradient(to right, rgba(255,255,255,0.1), rgba(255,255,255,0.25) 30%, rgba(255,255,255,0.1));
+            border-left: 4px solid #00d2d3;
+            border-right: 4px solid #00d2d3;
+            border-top: 10px solid #341f97;
+            border-bottom: 15px solid #341f97;
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            box-shadow: 0 0 20px rgba(0, 210, 211, 0.3);
+        }
+        
+        /* O Robô dentro do Tubo */
+        .robot {
+            font-size: 75px;
+            margin-bottom: 10px;
+            z-index: 1;
+            transition: transform 0.2s;
+            user-select: none;
+        }
+
+        /* A Parede de Tijolos que Sobe */
+        .brick-wall {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 0%; 
+            background-color: #b33939;
+            background-image: 
+                linear-gradient(335deg, #8c2525 23px, transparent 23px),
+                linear-gradient(155deg, #a63030 23px, transparent 23px),
+                linear-gradient(335deg, #8c2525 23px, transparent 23px),
+                linear-gradient(155deg, #a63030 23px, transparent 23px);
+            background-size: 30px 30px;
+            background-position: 0 0, 4px 15px, 15px 15px, 19px 0;
+            border-top: 5px solid #ff5252;
+            transition: height 0.1s linear;
+            z-index: 2;
+        }
+
+        /* Painel de Perguntas */
+        .quiz-panel {
+            flex-grow: 1;
+            min-width: 280px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .question-box {
+            background: #1e1e28;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 5px solid #f1c40f;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .option-btn {
+            background: #3d3d52;
+            border: 2px solid #57577a;
+            color: white;
+            padding: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            text-align: left;
+            transition: all 0.2s;
+            width: 100%;
+        }
+        .option-btn:hover:not(:disabled) {
+            background: #57577a;
+            border-color: #f1c40f;
+        }
+
+        /* Placar e Score */
+        .score-badge {
+            background: #10ac84;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        /* Telas Finais */
+        .screen-overlay {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 10;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            border-radius: 12px;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-header">
+        <h1>🚨 Teletube Escape: Robot Rescue 🚨</h1>
+        <p style="color: #a4b0be; font-size: 14px; margin-top: 4px;">Responda rápido antes que a parede de tijolos tampe o tubo!</p>
+    </div>
+
+    <div class="main-stage" style="position: relative;">
+        <div class="tube-container">
+            <div class="robot" id="robot-avatar">🤖</div>
+            <div class="brick-wall" id="wall"></div>
+        </div>
+
+        <div class="quiz-panel">
+            <div class="question-box" id="question-text">Carregando desafio...</div>
+            <div class="options-list" id="options-container"></div>
+            <div>
+                <span class="score-badge">Salvos: <span id="score-display">0</span></span>
+            </div>
+        </div>
+
+        <div class="screen-overlay" id="end-screen">
+            <h2 id="end-title" style="font-size: 28px; margin-bottom: 10px;">Fim de Jogo</h2>
+            <p id="end-desc" style="color: #a4b0be; margin-bottom: 20px; font-size: 16px;"></p>
+            <button onclick="restartGame()" style="background: #f1c40f; color: #000; border: none; padding: 12px 30px; font-weight: bold; border-radius: 25px; cursor: pointer; font-size: 16px;">Tentar Novamente 🔄</button>
+        </div>
+    </div>
+
+    <script>
+        const database = [
+            { question: "Onde compramos pão fresquinho de manhã? 🥖", correct: "Bakery", choices: ["Bakery", "Drugstore", "Bus Stop", "Church"] },
+            { question: "Qual é o local onde vamos para estudar e aprender? 🏫", correct: "School", choices: ["Hospital", "School", "Gym", "Port"] },
+            { question: "Onde as pessoas vão para fazer orações e celebrações? ⛪", correct: "Church", choices: ["Sports Center", "Bakery", "Church", "School"] },
+            { question: "Onde esperamos o transporte coletivo passar? 🚌", correct: "Bus Stop", choices: ["Port", "Bus Stop", "Hospital", "Gym"] },
+            { question: "Onde vamos quando estamos doentes ou machucados? 🏥", correct: "Hospital", choices: ["Hospital", "Drugstore", "Grocery Store", "Bakery"] },
+            { question: "Onde os atletas jogam futebol e fazem esportes? ⚽", correct: "Sports Center", choices: ["Gym", "Port", "Church", "Sports Center"] },
+            { question: "O que é uma 'Drugstore' em português? 💊", correct: "Farmácia", choices: ["Padaria", "Farmácia", "Supermercado", "Escola"] },
+            { question: "Onde os navios e barcos atracam na cidade? 🚢", correct: "Port", choices: ["Bus Stop", "Gym", "Port", "Sports Center"] },
+            { question: "Onde vamos para treinar e fazer musculação? 🏋️", correct: "Gym", choices: ["Gym", "School", "Bakery", "Hospital"] },
+            { question: "Onde fica a 'floating house' do vocabulário? 🏠🌊", correct: "Na água", choices: ["Na água", "No porto", "Na escola", "No centro esportivo"] }
+        ];
+
+        let score = 0;
+        let currentQuestionIndex = 0;
+        let wallHeight = 0;
+        let gameTicker;
+        let activeQuestion;
+        let speedMultiplier = 1.0; 
+
+        function startGame() {
+            score = 0;
+            currentQuestionIndex = 0;
+            speedMultiplier = 1.0; // Correção do Bug de velocidade cumulativa
+            document.getElementById('score-display').innerText = score;
+            document.getElementById('end-screen').style.display = 'none';
+            document.getElementById('robot-avatar').innerText = "🤖";
+            
+            // Embaralhar banco de dados
+            database.sort(() => Math.random() - 0.5);
+            loadNextQuestion();
+        }
+
+        function loadNextQuestion() {
+            if (currentQuestionIndex >= database.length) {
+                winGame();
+                return;
+            }
+
+            wallHeight = 0;
+            document.getElementById('wall').style.height = wallHeight + "%";
+            document.getElementById('robot-avatar').style.transform = "scale(1)";
+            document.getElementById('robot-avatar').innerText = "🤖";
+
+            activeQuestion = database[currentQuestionIndex];
+            document.getElementById('question-text').innerText = activeQuestion.question;
+
+            const container = document.getElementById('options-container');
+            container.innerHTML = "";
+            
+            let balancedChoices = [...activeQuestion.choices].sort(() => Math.random() - 0.5);
+
+            balancedChoices.forEach(choice => {
+                let btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = choice;
+                btn.onclick = () => checkAnswer(choice, btn);
+                container.appendChild(btn);
+            });
+
+            // Motor do temporizador
+            clearInterval(gameTicker);
+            gameTicker = setInterval(() => {
+                wallHeight += (1.0 * speedMultiplier); // Velocidade suave e progressiva
+                document.getElementById('wall').style.height = wallHeight + "%";
+
+                if (wallHeight > 35 && wallHeight < 70) document.getElementById('robot-avatar').innerText = "😰";
+                if (wallHeight >= 70) document.getElementById('robot-avatar').innerText = "😱";
+
+                if (wallHeight >= 100) {
+                    clearInterval(gameTicker);
+                    gameOver("TIME OUT! ⏱️", "Você demorou muito e a parede cobriu o Teletubo por completo!");
+                }
+            }, 100);
+        }
+
+        function checkAnswer(selected, buttonClicked) {
+            clearInterval(gameTicker);
+            
+            const buttons = document.querySelectorAll('.option-btn');
+            buttons.forEach(b => b.disabled = true);
+
+            // Verificação segura eliminando espaços invisíveis nas pontas
+            if (selected.trim() === activeQuestion.correct.trim()) {
+                buttonClicked.style.background = "#10ac84";
+                buttonClicked.style.borderColor = "#10ac84";
+                document.getElementById('robot-avatar').innerText = "🥳";
+                score += 10;
+                document.getElementById('score-display').innerText = score;
+                speedMultiplier += 0.12; // Aumenta levemente a dificuldade por acerto
+
+                setTimeout(() => {
+                    currentQuestionIndex++;
+                    loadNextQuestion();
+                }, 1000);
+            } else {
+                buttonClicked.style.background = "#ff5252";
+                buttonClicked.style.borderColor = "#ff5252";
+                document.getElementById('robot-avatar').innerText = "☠️";
+                
+                setTimeout(() => {
+                    gameOver("WRONG ANSWER ❌", `A resposta correta era: "${activeQuestion.correct}".`);
+                }, 800);
+            }
+        }
+
+        function gameOver(title, message) {
+            document.getElementById('end-screen').style.display = 'flex';
+            document.getElementById('end-title').innerText = title;
+            document.getElementById('end-title').style.color = "#ff5252";
+            document.getElementById('end-desc').innerText = message;
+        }
+
+        function winGame() {
+            clearInterval(gameTicker);
+            document.getElementById('end-screen').style.display = 'flex';
+            document.getElementById('end-title').innerText = "🏆 PERFEITO!";
+            document.getElementById('end-title').style.color = "#10ac84";
+            document.getElementById('end-desc').innerText = `Incrível! Você salvou o robô de todas as rodadas!\nPontuação Final: ${score} pontos.`;
+        }
+
+        function restartGame() {
+            startGame();
+        }
+
+        startGame();
+    </script>
+</body>
+</html>
