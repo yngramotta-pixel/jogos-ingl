@@ -96,18 +96,29 @@
             display: flex; align-items: center; justify-content: center;
             font-size: 24px; position: relative; transition: background 0.3s;
         }
-        .cell.path { background-color: #ffeaa7; } /* Grama/Rua fofa */
+        .cell.path { background-color: #ffeaa7; } 
         .cell.obstacle { background-color: #ff6b6b; }
         .cell.target { background-color: #55efc4; animation: pulse 1.5s infinite; }
 
         /* Elemento da Capivara */
         .capy-actor {
-            font-size: 32px; position: absolute; z-index: 5;
+            width: 45px;
+            height: 45px;
+            position: absolute; z-index: 5;
             transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
         .capy-accessory {
-            position: absolute; font-size: 14px; top: -10px;
+            position: absolute; font-size: 14px; top: -8px; z-index: 6;
+        }
+
+        /* Sprite Interno - Corrige a rotação e espelha para a direita */
+        #body-sprite {
+            font-size: 32px;
+            display: inline-block;
+            transition: transform 0.3s ease;
+            /* scaleX(-1) faz o emoji olhar para a direita por padrão */
+            transform: scaleX(-1) rotate(0deg); 
         }
 
         @keyframes pop { 0% { transform: scale(0.7); } 100% { transform: scale(1); } }
@@ -152,13 +163,12 @@
             <div class="grid-container" id="stage-grid"></div>
             <div class="capy-actor" id="capy-player">
                 <span id="accessory-slot" class="capy-accessory"></span>
-                <span style="display:inline-block; transition: transform 0.3s;" id="body-sprite">🦫</span>
+                <span id="body-sprite">🦫</span>
             </div>
         </div>
     </div>
 
     <script>
-        // Configuração do Mapa 7x7 (0 = Livre/Caminho, 1 = Obstáculo, 2 = Início, 3 = Parque/Destino)
         const mapMatrix = [
             [2, 0, 1, 0, 0, 0, 1],
             [1, 0, 0, 0, 1, 0, 0],
@@ -174,7 +184,7 @@
         const gapSize = 4;
 
         let capyPos = { x: 0, y: 0 };
-        let currentRotation = 0; // Guardado em graus acumulados (impede ficar de cabeça para baixo)
+        let currentRotation = 0; 
         let commandsQueue = [];
         let isExecuting = false;
 
@@ -206,15 +216,15 @@
             const player = document.getElementById('capy-player');
             const sprite = document.getElementById('body-sprite');
             
-            // Cálculo fluido considerando as margens e gaps do grid dinâmico
+            // Centraliza o ator fofinho perfeitamente dentro da célula ativa
             const topPos = capyPos.y * (cellSize + gapSize) + 5;
             const leftPos = capyPos.x * (cellSize + gapSize) + 5;
             
             player.style.top = topPos + "px";
             player.style.left = leftPos + "px";
             
-            // Rotação limpa apenas no eixo horizontal/vertical sem inverter o sprite de ponta-cabeça
-            sprite.style.transform = `rotate(${currentRotation}deg)`;
+            // Mantém o espelhamento scaleX(-1) para a direita e adiciona os graus da rotação de forma limpa!
+            sprite.style.transform = `scaleX(-1) rotate(${-currentRotation}deg)`;
         }
 
         function changeAccessory(emoji, button) {
@@ -262,7 +272,7 @@
                 let cmd = commandsQueue[i];
                 let success = moveStep(cmd);
                 
-                await new Promise(resolve => setTimeout(resolve, 500)); // Tempo para animação fluida
+                await new Promise(resolve => setTimeout(resolve, 500)); 
 
                 if (!success) {
                     alert("💥 Oh no! A capivara bateu em um obstáculo ou saiu do caminho seguro! Tente ajustar seu código.");
@@ -270,7 +280,6 @@
                     break;
                 }
 
-                // Verifica vitória instantânea no final do movimento
                 if (mapMatrix[capyPos.y][capyPos.x] === 3) {
                     alert("🎉 Perfeito! A capivara chegou em segurança ao parque! Código correto!");
                     commandsQueue = [];
@@ -285,29 +294,33 @@
             let nextX = capyPos.x;
             let nextY = capyPos.y;
 
+            if (command === 'Turn Left') {
+                currentRotation -= 90;
+                updateCapyVisualPosition();
+                return true;
+            } 
+            if (command === 'Turn Right') {
+                currentRotation += 90;
+                updateCapyVisualPosition();
+                return true;
+            }
+
+            // Normaliza o ângulo matemático para prever o passo para frente ou para trás baseado na rotação
+            let angle = (currentRotation % 360 + 360) % 360;
+
             if (command === 'Go Straight') {
-                // Depende da direção atual em que ela está olhando
-                let angle = (currentRotation % 360 + 360) % 360;
                 if (angle === 0) nextX++;
                 else if (angle === 90) nextY++;
                 else if (angle === 180) nextX--;
                 else if (angle === 270) nextY--;
             } 
             else if (command === 'Go Back') {
-                let angle = (currentRotation % 360 + 360) % 360;
                 if (angle === 0) nextX--;
                 else if (angle === 90) nextY--;
                 else if (angle === 180) nextX++;
                 else if (angle === 270) nextY++;
-            } 
-            else if (command === 'Turn Left') {
-                currentRotation -= 90;
-            } 
-            else if (command === 'Turn Right') {
-                currentRotation += 90;
             }
 
-            // Validadores de limites e colisões
             if (nextX < 0 || nextX >= gridSize || nextY < 0 || nextY >= gridSize) return false;
             if (mapMatrix[nextY][nextX] === 1) return false;
 
@@ -317,7 +330,6 @@
             return true;
         }
 
-        // Inicia o tabuleiro ao carregar
         createMap();
     </script>
 </body>
