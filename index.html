@@ -1,10 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher's Arcade - English Games</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+        header p {
+            font-size: 1.1rem;
+            color: #e0e0e0;
+        }
+        .games-grid {
+            display: flex;
+            gap: 30px;
+            max-width: 1050px;
+            width: 100%;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .game-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            width: 310px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .game-card:hover {
+            transform: translateY(-10px);
+            border-color: #2ecc71;
+            background: rgba(255, 255, 255, 0.15);
+        }
+        .game-icon {
+            font-size: 4rem;
+            margin-bottom: 15px;
+        }
+        .game-card h2 {
+            font-size: 1.4rem;
+            margin-bottom: 12px;
+            color: #f1c40f;
+        }
+        .game-card p {
+            font-size: 0.95rem;
+            color: #ecf0f1;
+            margin-bottom: 20px;
+            line-height: 1.4;
+            flex-grow: 1;
+        }
+        .play-btn {
+            display: inline-block;
+            background-color: #2ecc71;
+            color: white;
+            text-decoration: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: background 0.2s;
+            box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);
+        }
+        .play-btn:hover {
+            background-color: #27ae60;
+        }
+        footer {
+            margin-top: auto;
+            padding-top: 40px;
+            font-size: 0.85rem;
+            color: #bdc3c7;
+        }
+    </style>
+</head>
+<body>
 
-<!-- saved from url=(0063)file:///C:/Users/yngra/Downloads/gemini-code-1779114862520.html -->
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></head><body><div class="game-card">
-    <div>
-        <div class="game-icon">🗣️</div>
-        <h2>City Sounds</h2>
-        <p>Ouça atentamente a pronúncia nativa dos lugares da cidade em inglês e vença os 3 níveis de audição e escrita.</p>
-    </div>
-    <a href="file:///C:/Users/yngra/Downloads/pronuncia.html" class="play-btn">Jogar Agora ▶</a>
-</div></body></html>
+    <header>
+        <h1>🌍 Teacher's Arcade</h1>
+        <p>Escolha uma missão abaixo e pratique seu inglês!</p>
+    </header>
+
+    <main class="games-grid">
+        <div class="game-card">
+            <div>
+                <div class="game-icon">🦫</div>
+                <h2>CapyCode: Rumo ao Parque</h2>
+                <p>Use comandos de lógica de programação em inglês para guiar a capivara pelas ruas da cidade evitando os obstáculos!</p>
+            </div>
+            <a href="jogo.html" class="play-btn">Jogar Agora ▶</a>
+        </div>
+
+        <div class="game-card">
+            <div>
+                <div class="game-icon">🏙️</div>
+                <h2>City Adventure</h2>
+                <p>Um jogo de tabuleiro virtual interativo para 2 a 4 jogadores. Gire o dado, avance as casas e complete os desafios da cidade.</p>
+            </div>
+            <a href="tabuleiro.html" class="play-btn">Jogar Agora ▶</a>
+        </div>
+
+        <div class="game-card">
+            <div>
+                <div class="game-icon">🗣️</div>
+                <h2>City Sounds</h2>
+                <p>Ouça atentamente a pronúncia nativa dos lugares da cidade em inglês e vença os 3 níveis progressivos de audição e escrita.</p>
+            </div>
+            <a href="pronuncia.html" class="play-btn">Jogar Agora ▶</a>
+        </div>
+    </main>
+
+    <footer>
+        <p>Criado para turmas de Inglês • Acesso de qualquer dispositivo</p>
+    </footer>
+
+</body>
+</html>
