@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Teacher's Arcade - English Games</title>
     <style>
-        /* ==================== RESET E DESIGN GLOBAL ==================== */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -16,13 +15,10 @@
             flex-direction: column;
             align-items: center;
             padding: 40px 20px;
-            position: relative;
         }
-        
         header {
             text-align: center;
             margin-bottom: 40px;
-            width: 100%;
         }
         header h1 {
             font-size: 2.5rem;
@@ -33,17 +29,11 @@
             font-size: 1.1rem;
             color: #e0e0e0;
         }
-
-        /* ==================== LAYOUT DO MENU PRINCIPAL ==================== */
-        #main-menu {
-            width: 100%;
-            max-width: 1200px;
-            display: block; /* Controlado via JS */
-        }
         .games-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 25px;
+            max-width: 1200px;
             width: 100%;
             justify-content: center;
         }
@@ -99,7 +89,7 @@
             background-color: #27ae60;
         }
         
-        /* ==================== BOTÃO VOLTAR GLOBAL ==================== */
+        /* Botão Sair Global */
         .btn-back {
             display: none;
             position: absolute;
@@ -114,100 +104,90 @@
             cursor: pointer;
             z-index: 100;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            transition: background 0.2s;
         }
         .btn-back:hover { background: #c0392b; }
 
-        /* ==================== CONTAINER DAS TELAS DE JOGO ==================== */
+        /* Telas Container dos Jogos */
         .game-screen {
-            display: none; /* Controlado via JS */
+            display: none;
             width: 100%;
-            max-width: 700px;
+            max-width: 800px;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            margin-top: 20px;
-            animation: fadeIn 0.4s ease-in-out;
+            animation: fadeIn 0.4s ease;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(15px); }
+            from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* Placeholder de telas em desenvolvimento */
         .dev-placeholder {
             background: rgba(0,0,0,0.4);
             padding: 40px;
             border-radius: 15px;
             text-align: center;
             border: 2px dashed #f1c40f;
-            width: 100%;
         }
 
-        /* ==================== INTEGRAÇÃO: HANGMAN CHALLENGE ==================== */
+        /* ==================== ESTILOS: HANGMAN CHALLENGE ==================== */
         .game-title {
             text-align: center;
             color: #f1c40f;
-            margin-bottom: 25px;
-            font-size: 2rem;
+            margin-bottom: 20px;
+            font-size: 28px;
             text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
         .main-container {
-            background: rgba(44, 62, 80, 0.85);
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 255, 255, 0.1);
+            background: #2c3e50;
+            max-width: 600px;
             width: 100%;
-            padding: 30px;
+            padding: 25px;
             border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 25px;
+            gap: 20px;
         }
         .hint-box {
-            font-size: 1.15rem;
-            color: #ecf0f1;
+            font-size: 18px;
+            color: #bdc3c7;
             text-align: center;
             font-weight: 600;
-            line-height: 1.5;
-            background: rgba(0, 0, 0, 0.2);
-            padding: 15px;
-            border-radius: 10px;
-            width: 100%;
         }
         .lives-box {
-            font-size: 1.1rem;
+            font-size: 18px;
             background: #c0392b;
-            padding: 8px 20px;
+            padding: 5px 15px;
             border-radius: 20px;
             font-weight: bold;
-            box-shadow: 0 4px 10px rgba(192, 57, 43, 0.4);
         }
         .word-display {
             display: flex;
             justify-content: center;
             flex-wrap: wrap;
             gap: 12px;
-            margin: 15px 0;
-            font-size: 2.2rem;
+            margin: 10px 0;
+            font-size: 2rem;
             font-weight: bold;
-            min-height: 50px;
+            min-height: 45px;
             width: 100%;
         }
         .letter-slot {
-            border-bottom: 4px solid #f1c40f;
-            width: 35px;
+            border-bottom: 4px solid #fff;
+            width: 30px;
             text-align: center;
             text-transform: uppercase;
-            color: #fff;
         }
         #feedback-toast {
             height: 30px;
-            font-size: 22px;
+            font-size: 20px;
             font-weight: bold;
             color: #2ecc71;
-            text-shadow: 0 0 10px rgba(46,204,113,0.8);
+            text-shadow: 0 0 8px rgba(46,204,113,0.6);
             transition: all 0.2s ease;
             opacity: 0;
             transform: scale(0.8);
@@ -219,64 +199,56 @@
         .keyboard {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 10px;
+            gap: 8px;
             width: 100%;
             margin-top: 10px;
         }
-        @media (max-width: 500px) {
-            .keyboard { grid-template-columns: repeat(6, 1fr); gap: 6px; }
-            .letter-slot { width: 25px; font-size: 1.8rem; }
-            .btn-back { position: static; margin-bottom: 20px; }
+        @media (max-width: 450px) {
+            .keyboard { grid-template-columns: repeat(6, 1fr); }
         }
         .key {
             background: #34495e;
-            border: 2px solid rgba(255,255,255,0.1);
+            border: 2px solid #7f8c8d;
             color: white;
-            border-radius: 8px;
+            border-radius: 6px;
             padding: 12px 5px;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             cursor: pointer;
             text-transform: uppercase;
-            transition: all 0.15s ease;
+            transition: all 0.2s ease;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 55px;
+            position: relative;
+            min-height: 50px;
         }
         .key:hover:not(:disabled) {
-            background: #4b6584;
+            background: #7f8c8d;
             border-color: #f1c40f;
-            transform: scale(1.05);
-        }
-        .key:disabled {
-            cursor: not-allowed;
         }
         .key.correct {
             background-color: #27ae60 !important;
             border-color: #2ecc71 !important;
             color: #fff;
-            box-shadow: 0 4px 10px rgba(46, 204, 113, 0.4);
         }
         .key.wrong {
             background-color: #7f8c8d !important;
             border-color: #95a5a6 !important;
             color: #bdc3c7;
-            opacity: 0.5;
+            opacity: 0.6;
         }
         .key-status {
             font-size: 11px;
             margin-top: 2px;
             font-weight: 800;
         }
-        
-        /* ==================== TELA DE RESULTADO FIM DE JOGO ==================== */
         .overlay {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 32, 67, 0.95);
+            background: rgba(0,0,0,0.9);
             z-index: 110;
             flex-direction: column;
             align-items: center;
@@ -284,16 +256,27 @@
             text-align: center;
             padding: 20px;
         }
-        .overlay h2 { font-size: 2.5rem; margin-bottom: 15px; text-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        .overlay p { font-size: 1.3rem; margin-bottom: 30px; color: #ecf0f1; max-width: 500px; }
-        
+        .overlay h2 { font-size: 32px; margin-bottom: 15px; }
+        .overlay p { font-size: 18px; margin-bottom: 25px; color: #bdc3c7; }
+        .reset-btn {
+            background: #f1c40f;
+            color: #000;
+            border: none;
+            padding: 12px 35px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .reset-btn:hover { transform: scale(1.05); }
+
         footer {
             margin-top: auto;
             padding-top: 40px;
             font-size: 0.85rem;
             color: #bdc3c7;
             text-align: center;
-            width: 100%;
         }
     </style>
 </head>
@@ -301,7 +284,7 @@
 
     <button class="btn-back" id="global-back-btn" onclick="goToMenu()">◀ Voltar ao Menu</button>
 
-    <div id="main-menu">
+    <div id="main-menu" style="width: 100%; max-width: 1200px;">
         <header>
             <h1>🌍 Teacher's Arcade</h1>
             <p>Escolha uma missão abaixo e pratique seu inglês!</p>
@@ -382,27 +365,25 @@
     </footer>
 
     <script>
-        // --- SISTEMA NAVEGAÇÃO SPA (SINGLE PAGE APPLICATION) ---
+        // --- SISTEMA NAVEGAÇÃO SPA ---
         function openGame(gameKey) {
-            // Oculta o menu principal completamente
             document.getElementById('main-menu').style.display = 'none';
             document.getElementById('global-back-btn').style.display = 'block';
             
-            // Oculta todas as telas de jogos abertas anteriormente
+            // Oculta todas as telas primeiro
             document.querySelectorAll('.game-screen').forEach(screen => screen.style.display = 'none');
             
-            // Ativa apenas a tela correspondente
+            // Ativa a tela correta
             const activeScreen = document.getElementById(`screen-${gameKey}`);
             if(activeScreen) activeScreen.style.display = 'flex';
 
-            // Inicializações de estado de cada jogo
+            // Inicializações específicas
             if (gameKey === 'hangman') {
                 initHangmanGame();
             }
         }
 
         function goToMenu() {
-            // Limpa estados visuais e retorna ao menu global
             document.querySelectorAll('.game-screen').forEach(screen => screen.style.display = 'none');
             document.getElementById('end-screen').style.display = 'none';
             document.getElementById('global-back-btn').style.display = 'none';
@@ -433,7 +414,6 @@
             guessedLetters = [];
             remainingLives = 6;
 
-            // Tratamento automático de espaços em palavras compostas (ex: BUS STOP)
             if(secretWord.includes(" ")) {
                 guessedLetters.push(" ");
             }
@@ -522,16 +502,16 @@
             const won = secretWord.split("").every(char => guessedLetters.includes(char));
             if (won) {
                 setTimeout(() => {
-                    showEndScreen("🎉 PARABÉNS! 🎉", `Você descobriu a palavra "${secretWord}" com sucesso!`, "#2ecc71");
-                }, 400);
+                    showEndScreen("🎉 PARABÉNS! 🎉", `Você descobriu a palavra "${secretWord}" com sucesso!`, "#10ac84");
+                }, 500);
             }
         }
 
         function checkLose() {
             if (remainingLives <= 0) {
                 setTimeout(() => {
-                    showEndScreen("☠️ GAME OVER ☠️", `Suas chances acabaram! A palavra correta era: "${secretWord}".`, "#ff5252");
-                }, 400);
+                    showEndScreen("☠️ GAME OVER ☠️", `Ficou sem chances! A palavra secreta era: "${secretWord}".`, "#ff5252");
+                }, 500);
             }
         }
 
