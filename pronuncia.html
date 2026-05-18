@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<!-- saved from url=(0063)file:///C:/Users/yngra/Downloads/gemini-code-1779108211638.html -->
+<html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>City Sounds: Pronunciation Game</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f6fa;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .game-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            margin-top: 20px;
+        }
+        .header-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: #7f8c8d;
+        }
+        .level-badge {
+            background-color: #3498db;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 14px;
+        }
+        .place-image {
+            font-size: 100px;
+            margin: 20px 0;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f1f2f6;
+            border-radius: 10px;
+        }
+        .audio-btn {
+            background-color: #9b59b6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-bottom: 20px;
+            transition: background 0.2s;
+        }
+        .audio-btn:hover { background-color: #8e44ad; }
+        
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .option-btn {
+            background-color: #f8f9fa;
+            border: 2px solid #dcdde1;
+            padding: 15px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .option-btn:hover { background-color: #e4e7eb; border-color: #b2bec3; }
+        
+        .input-area {
+            display: none;
+            margin-top: 20px;
+        }
+        .input-area input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 2px solid #ced4da;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .submit-btn {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .feedback {
+            margin-top: 15px;
+            font-weight: bold;
+            font-size: 18px;
+            height: 25px;
+        }
+        .score-board { display: none; }
+        .score-board h2 { color: #2ecc71; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+
+    <h1 style="color: #2c3e50;">🏙️ City Sounds: Places Game</h1>
+    <p style="color: #7f8c8d; margin-bottom: 10px;">Treine seus ouvidos e sua pronúncia!</p>
+
+    <div class="game-card" id="quiz-area" style="display: block;">
+        <div class="header-info">
+            <span id="level-indicator" class="level-badge">Level 2: Só Ouvir e Traduzir</span>
+            <span>Pontos: <span id="score-display" style="color:#2ecc71">120</span></span>
+        </div>
+
+        <div class="place-image" id="visual-element" style="opacity: 1;">❓</div>
+        
+        <button class="audio-btn" onclick="speakCurrentPlace()">Ouvir Pronúncia 🔊</button>
+        <p id="instruction-text" style="font-weight: 500; color: #57606f;">Clique no som e identifique a tradução correta:</p>
+
+        <div class="options-grid" id="options-container" style="display: grid;"><button class="option-btn">padaria</button><button class="option-btn">escola</button><button class="option-btn">farmácia</button><button class="option-btn">casa flutuante</button></div>
+
+        <div class="input-area" id="typing-container" style="display: none;">
+            <input type="text" id="type-input" placeholder="Digite o que você ouviu em inglês..." autocomplete="off">
+            <button class="submit-btn" onclick="checkTypingAnswer()">Verificar Resposta</button>
+        </div>
+
+        <div class="feedback" id="feedback-message"></div>
+    </div>
+
+    <div class="game-card score-board" id="end-area" style="display: none;">
+        <h2>🎉 Fim de Jogo!</h2>
+        <p style="font-size: 18px; margin-bottom: 10px;">Sua pontuação final foi de:</p>
+        <div style="font-size: 48px; font-weight: bold; color: #f1c40f; margin-bottom: 20px;"><span id="final-score">0</span> pts</div>
+        <p id="ranking-message" style="font-weight: bold; font-size: 18px; color: #34495e; margin-bottom: 25px;"></p>
+        <button class="audio-btn" onclick="resetGame()" style="background-color: #2ecc71;">Jogar Novamente 🔄</button>
+    </div>
+
+    <script>
+        // Banco de dados dos lugares da cidade
+        const placesDatabase = [
+            { english: "bakery", portuguese: "padaria", emoji: "🥖" },
+            { english: "church", portuguese: "igreja", emoji: "⛪" },
+            { english: "bus stop", portuguese: "ponto de ônibus", emoji: "🚌" },
+            { english: "sports center", portuguese: "centro esportivo", emoji: "⚽" },
+            { english: "gym", portuguese: "academia", emoji: "🏋️" },
+            { english: "drugstore", portuguese: "farmácia", emoji: "💊" },
+            { english: "grocery store", portuguese: "mercearia / mercado", emoji: "🛒" },
+            { english: "school", portuguese: "escola", emoji: "🏫" },
+            { english: "floating house", portuguese: "casa flutuante", emoji: "🏠🌊" },
+            { english: "port", portuguese: "porto", emoji: "🚢" },
+            { english: "hospital", portuguese: "hospital", emoji: "🏥" }
+        ];
+
+        let currentLevel = 1; // 1, 2 ou 3
+        let currentItemIndex = 0;
+        let score = 0;
+        let gameSequence = [];
+        let canAnswer = true;
+
+        function initGame() {
+            score = 0;
+            currentLevel = 1;
+            currentItemIndex = 0;
+            document.getElementById('score-display').innerText = score;
+            document.getElementById('quiz-area').style.display = 'block';
+            document.getElementById('end-area').style.display = 'none';
+            
+            // Embaralha os itens para criar uma sequência única
+            gameSequence = [...placesDatabase].sort(() => Math.random() - 0.5);
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            canAnswer = true;
+            document.getElementById('feedback-message').innerText = "";
+            document.getElementById('type-input').value = "";
+            
+            let item = gameSequence[currentItemIndex];
+
+            // Atualiza indicadores de Nível
+            if (currentLevel === 1) {
+                document.getElementById('level-indicator').innerText = "Level 1: Ver, Ouvir e Traduzir";
+                document.getElementById('visual-element').style.opacity = "1";
+                document.getElementById('visual-element').innerText = item.emoji;
+                document.getElementById('instruction-text').innerText = "O que significa este lugar?";
+                setupMultipleChoice();
+            } 
+            else if (currentLevel === 2) {
+                document.getElementById('level-indicator').innerText = "Level 2: Só Ouvir e Traduzir";
+                document.getElementById('visual-element').innerText = "❓"; // Esconde a imagem real
+                document.getElementById('instruction-text').innerText = "Clique no som e identifique a tradução correta:";
+                setupMultipleChoice();
+            } 
+            else if (currentLevel === 3) {
+                document.getElementById('level-indicator').innerText = "Level 3: Ouvir e Escrever (em Inglês)";
+                document.getElementById('visual-element').innerText = "✍️";
+                document.getElementById('instruction-text').innerText = "Ouça a palavra e digite-a corretamente em INGLÊS:";
+                document.getElementById('options-container').style.display = 'none';
+                document.getElementById('typing-container').style.display = 'block';
+            }
+
+            // Fala automaticamente ao carregar a questão no Level 1 e 3
+            setTimeout(() => { speakCurrentPlace(); }, 400);
+        }
+
+        // Função de voz nativa (Web Speech API)
+        function speakCurrentPlace() {
+            let item = gameSequence[currentItemIndex];
+            let utterance = new SpeechSynthesisUtterance(item.english);
+            utterance.lang = 'en-US'; // Sotaque Americano. Mude para 'en-GB' se preferir Britânico.
+            utterance.rate = 0.85;    // Velocidade levemente reduzida para fins pedagógicos
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function setupMultipleChoice() {
+            document.getElementById('options-container').style.display = 'grid';
+            document.getElementById('typing-container').style.display = 'none';
+            
+            let correctItem = gameSequence[currentItemIndex];
+            
+            // Pega 3 alternativas erradas aleatórias
+            let duds = placesDatabase
+                .filter(i => i.portuguese !== correctItem.portuguese)
+                .sort(() => Math.random() - 0.5)
+                .slice(0, 3);
+            
+            // Junta a certa com as erradas e embaralha
+            let choices = [correctItem, ...duds].sort(() => Math.random() - 0.5);
+            
+            const container = document.getElementById('options-container');
+            container.innerHTML = "";
+            
+            choices.forEach(choice => {
+                let btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = choice.portuguese;
+                btn.onclick = () => checkChoiceAnswer(choice.portuguese, btn);
+                container.appendChild(btn);
+            });
+        }
+
+        function checkChoiceAnswer(selectedTranslation, selectedBtn) {
+            if (!canAnswer) return;
+            canAnswer = false;
+
+            let correctItem = gameSequence[currentItemIndex];
+            let feedback = document.getElementById('feedback-message');
+
+            if (selectedTranslation === correctItem.portuguese) {
+                feedback.innerHTML = "<span style='color:#2ecc71'>🎉 Correto! +10 pts</span>";
+                score += 10;
+                document.getElementById('score-display').innerText = score;
+                selectedBtn.style.backgroundColor = "#2ecc71";
+                selectedBtn.style.color = "white";
+            } else {
+                feedback.innerHTML = `<span style='color:#e74c3c'>❌ Incorreto! Era "${correctItem.portuguese}".</span>`;
+                selectedBtn.style.backgroundColor = "#e74c3c";
+                selectedBtn.style.color = "white";
+            }
+
+            nextStep();
+        }
+
+        function checkTypingAnswer() {
+            if (!canAnswer) return;
+            canAnswer = false;
+
+            let correctItem = gameSequence[currentItemIndex];
+            let userAnswer = document.getElementById('type-input').value.trim().toLowerCase();
+            let feedback = document.getElementById('feedback-message');
+
+            if (userAnswer === correctItem.english.toLowerCase()) {
+                feedback.innerHTML = "<span style='color:#2ecc71'>🎉 Ótimo Spelling! +15 pts</span>";
+                score += 15;
+                document.getElementById('score-display').innerText = score;
+            } else {
+                feedback.innerHTML = `<span style='color:#e74c3c'>❌ Errou. Escrita correta: "${correctItem.english}".</span>`;
+            }
+
+            nextStep();
+        }
+
+        function nextStep() {
+            currentItemIndex++;
+            
+            // Avança os níveis conforme o progresso da lista de palavras
+            if (currentItemIndex >= gameSequence.length) {
+                currentItemIndex = 0;
+                currentLevel++;
+                // Embaralha de novo para o próximo nível
+                gameSequence.sort(() => Math.random() - 0.5);
+            }
+
+            // Se passar do nível 3, fim de jogo
+            if (currentLevel > 3) {
+                setTimeout(endGame, 1500);
+            } else {
+                setTimeout(loadQuestion, 1500);
+            }
+        }
+
+        function endGame() {
+            document.getElementById('quiz-area').style.display = 'none';
+            document.getElementById('end-area').style.display = 'block';
+            document.getElementById('final-score').innerText = score;
+
+            let rank = "";
+            if (score >= 250) rank = "🥇 Mayor of the City (Prefeito da Cidade)! Pronúncia impecável!";
+            else if (score >= 150) rank = "🥈 City Guide (Guia Turístico)! Muito bom seu ouvido!";
+            else rank = "🥉 Tourist (Turista)! Precisa explorar mais a cidade e praticar!";
+            
+            document.getElementById('ranking-message').innerText = rank;
+        }
+
+        function resetGame() {
+            initGame();
+        }
+
+        // Inicializa o jogo automaticamente
+        initGame();
+    </script>
+
+</body></html>

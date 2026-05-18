@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>City Adventure: Gameboard</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        h1 { color: #2c3e50; margin-bottom: 5px; text-align: center; }
+        p.subtitle { color: #7f8c8d; margin-bottom: 15px; }
+
+        .game-container {
+            display: flex;
+            gap: 20px;
+            max-width: 1200px;
+            width: 100%;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        /* Configuração do Tabuleiro Dinâmico */
+        .board {
+            display: grid;
+            grid-template-columns: repeat(8, 75px);
+            grid-template-rows: repeat(7, 75px);
+            gap: 4px;
+            background-color: #34495e;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+
+        .cell {
+            background-color: #fff;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 5px;
+            font-size: 11px;
+            font-weight: bold;
+            position: relative;
+            text-align: center;
+            border: 2px solid #bdc3c7;
+        }
+
+        /* Cores das Casas Especiais */
+        .cell-start { background-color: #2ecc71; color: white; }
+        .cell-finish { background-color: #f1c40f; color: #2c3e50; font-size: 14px; }
+        .cell-place { background-color: #dff9fb; border-color: #3498db; color: #2980b9; }
+        .cell-bonus { background-color: #2ecc71; color: white; border-color: #27ae60; }
+        .cell-penalty { background-color: #e74c3c; color: white; border-color: #c0392b; }
+
+        .cell-num {
+            position: absolute;
+            top: 2px;
+            left: 4px;
+            font-size: 10px;
+            color: #7f8c8d;
+        }
+        .cell-bonus .cell-num, .cell-penalty .cell-num, .cell-start .cell-num { color: rgba(255,255,255,0.7); }
+
+        /* Peões dos Jogadores */
+        .players-container {
+            display: flex;
+            gap: 3px;
+            justify-content: center;
+            flex-wrap: wrap;
+            width: 100%;
+            margin-bottom: 2px;
+        }
+        .pawn {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            display: inline-block;
+        }
+        .p1 { background-color: #e74c3c; }
+        .p2 { background-color: #3498db; }
+        .p3 { background-color: #f1c40f; }
+        .p4 { background-color: #9b59b6; }
+
+        /* Painel Lateral de Controle */
+        .controls {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            width: 320px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .setup-zone select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 5px;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+
+        .turn-indicator {
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            padding: 10px;
+            background-color: #ecf0f1;
+            border-radius: 5px;
+            border-left: 5px solid #ccc;
+        }
+
+        /* Estilo do Dado */
+        .dice-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .dice {
+            width: 60px;
+            height: 60px;
+            background-color: #fff;
+            border: 3px solid #2c3e50;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            transition: transform 0.2s;
+        }
+        .dice:active { transform: scale(0.9); }
+        
+        .log {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            height: 120px;
+            overflow-y: auto;
+            font-size: 12px;
+            border-radius: 5px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🏙️ City Adventure: Around the City</h1>
+    <p class="subtitle">Pratique direções e lugares da cidade jogando com seus amigos!</p>
+
+    <div class="game-container">
+        <div class="board" id="board"></div>
+
+        <div class="controls">
+            <div class="setup-zone" id="setup">
+                <label><strong>Número de Jogadores:</strong></label>
+                <select id="player-count" onchange="initGame()">
+                    <option value="2">2 Jogadores (Vermelho vs Azul)</option>
+                    <option value="4">4 Jogadores (Vermelho, Azul, Amarelo, Roxo)</option>
+                </select>
+            </div>
+
+            <div class="turn-indicator" id="turn-display">Vez do Jogador 1</div>
+
+            <div class="dice-area">
+                <div class="dice" id="dice-btn" onclick="rollDice()">🎲</div>
+                <p style="font-size: 12px; color: #7f8c8d;">Clique no dado para jogar</p>
+            </div>
+
+            <div class="log" id="game-log">📌 Jogo iniciado! Boa sorte!</div>
+            <button onclick="initGame()" style="padding: 8px; background: #95a5a6; color: white; border: none; border-radius: 5px; cursor: pointer;">Reiniciar Jogo</button>
+        </div>
+    </div>
+
+    <script>
+        const boardSize = 50;
+        let numPlayers = 2;
+        let playerPositions = [1, 1, 1, 1];
+        let playerColors = ['#e74c3c', '#3498db', '#f1c40f', '#9b59b6'];
+        let currentPlayer = 0;
+        let isRolling = false;
+
+        // Mapeamento das propriedades de cada uma das 50 casas (Bônus, Lugares, Perdas)
+        const boardData = {
+            1: { type: 'start', label: 'START' },
+            50: { type: 'finish', label: '🎉 FINISH' },
+            // Lugares (Places)
+            4: { type: 'place', label: 'Bakery 🥖' },
+            8: { type: 'place', label: 'Church ⛪' },
+            12: { type: 'place', label: 'School 🏫' },
+            19: { type: 'place', label: 'Gas Station ⛽' },
+            24: { type: 'place', label: 'Sports Center ⚽' },
+            29: { type: 'place', label: 'Bus Stop 🚌' },
+            34: { type: 'place', label: 'Bakery 🥖' },
+            38: { type: 'place', label: 'School 🏫' },
+            43: { type: 'place', label: 'Sports Center ⚽' },
+            47: { type: 'place', label: 'Bus Stop 🚌' },
+            // Bônus
+            6: { type: 'bonus', label: 'Move +2', effect: 2 },
+            15: { type: 'bonus', label: 'Move +3', effect: 3 },
+            22: { type: 'bonus', label: 'Move +2', effect: 2 },
+            32: { type: 'bonus', label: 'Move +4', effect: 4 },
+            41: { type: 'bonus', label: 'Move +2', effect: 2 },
+            // Perdas
+            10: { type: 'penalty', label: 'Go Back 2', effect: -2 },
+            17: { type: 'penalty', label: 'Go Back 3', effect: -3 },
+            27: { type: 'penalty', label: 'Go Back 1', effect: -1 },
+            36: { type: 'penalty', label: 'Go Back 3', effect: -3 },
+            45: { type: 'penalty', label: 'Go Back 5', effect: -5 }
+        };
+
+        // Geração da ordem visual do Grid em Espiral/Boustrophedon (vai e volta) para caber na tela
+        const gridOrder = [
+            1,  2,  3,  4,  5,  6,  7,  8,
+            16, 15, 14, 13, 12, 11, 10, 9,
+            17, 18, 19, 20, 21, 22, 23, 24,
+            32, 31, 30, 29, 28, 27, 26, 25,
+            33, 34, 35, 36, 37, 38, 39, 40,
+            48, 47, 46, 45, 44, 43, 42, 41,
+            49, 50
+        ];
+
+        function initGame() {
+            numPlayers = parseInt(document.getElementById('player-count').value);
+            playerPositions = [1, 1, 1, 1];
+            currentPlayer = 0;
+            isRolling = false;
+            document.getElementById('game-log').innerHTML = "📌 Jogo reiniciado!";
+            updateTurnDisplay();
+            drawBoard();
+        }
+
+        function drawBoard() {
+            const boardElement = document.getElementById('board');
+            boardElement.innerHTML = '';
+
+            gridOrder.forEach(num => {
+                const cellDiv = document.createElement('div');
+                cellDiv.className = 'cell';
+                cellDiv.id = `cell-${num}`;
+
+                // Número da casa
+                const numSpan = document.createElement('span');
+                numSpan.className = 'cell-num';
+                numSpan.innerText = num;
+                cellDiv.appendChild(numSpan);
+
+                // Container de peões
+                const playersDiv = document.createElement('div');
+                playersDiv.className = 'players-container';
+                playersDiv.id = `players-cell-${num}`;
+                cellDiv.appendChild(playersDiv);
+
+                // Texto interno customizado
+                const textSpan = document.createElement('span');
+                if (boardData[num]) {
+                    cellDiv.classList.add(`cell-${boardData[num].type}`);
+                    textSpan.innerText = boardData[num].label;
+                } else {
+                    textSpan.innerText = "City Street";
+                    textSpan.style.color = "#bdc3c7";
+                }
+                cellDiv.appendChild(textSpan);
+                boardElement.appendChild(cellDiv);
+            });
+
+            updatePawns();
+        }
+
+        function updatePawns() {
+            // Limpa peões anteriores
+            for(let i=1; i<=boardSize; i++) {
+                const container = document.getElementById(`players-cell-${i}`);
+                if(container) container.innerHTML = '';
+            }
+            // Coloca os peões ativos nas posições corretas
+            for(let p=0; p<numPlayers; p++) {
+                const pos = playerPositions[p];
+                const container = document.getElementById(`players-cell-${pos}`);
+                if(container) {
+                    const pawn = document.createElement('div');
+                    pawn.className = `pawn p${p+1}`;
+                    container.appendChild(pawn);
+                }
+            }
+        }
+
+        function updateTurnDisplay() {
+            const display = document.getElementById('turn-display');
+            display.innerText = `Vez do Jogador ${currentPlayer + 1}`;
+            display.style.borderLeftColor = playerColors[currentPlayer];
+        }
+
+        function logMessage(msg) {
+            const log = document.getElementById('game-log');
+            log.innerHTML = `> ${msg}<br>` + log.innerHTML;
+        }
+
+        function rollDice() {
+            if (isRolling) return;
+            isRolling = true;
+
+            const diceBtn = document.getElementById('dice-btn');
+            let counter = 0;
+            
+            // Efeito visual de girar o dado
+            const interval = setInterval(() => {
+                diceBtn.innerText = Math.floor(Math.random() * 6) + 1;
+                counter++;
+                if(counter > 8) {
+                    clearInterval(interval);
+                    
+                    const steps = Math.floor(Math.random() * 6) + 1;
+                    diceBtn.innerText = steps;
+                    movePlayer(steps);
+                }
+            }, 80);
+        }
+
+        function movePlayer(steps) {
+            let currentPos = playerPositions[currentPlayer];
+            let targetPos = currentPos + steps;
+
+            logMessage(`Jogador ${currentPlayer + 1} tirou **${steps}** no dado.`);
+
+            if (targetPos >= boardSize) {
+                playerPositions[currentPlayer] = boardSize;
+                updatePawns();
+                logMessage(`🎉 JOGADOR ${currentPlayer + 1} É O VENCEDOR!`);
+                alert(`Parabéns Jogador ${currentPlayer + 1}! Você venceu a corrida pela cidade!`);
+                isRolling = false;
+                return;
+            }
+
+            playerPositions[currentPlayer] = targetPos;
+            updatePawns();
+
+            // Verifica efeitos da casa pousada
+            setTimeout(() => {
+                const cellEffect = boardData[targetPos];
+                if (cellEffect) {
+                    if (cellEffect.type === 'bonus') {
+                        logMessage(`🎁 Bônus na casa ${targetPos}! Avança ${cellEffect.effect} casas.`);
+                        playerPositions[currentPlayer] += cellEffect.effect;
+                    } else if (cellEffect.type === 'penalty') {
+                        logMessage(`⚠️ Ih! Obstáculo na casa ${targetPos}! Volta ${Math.abs(cellEffect.effect)} casas.`);
+                        playerPositions[currentPlayer] += cellEffect.effect;
+                    } else if (cellEffect.type === 'place') {
+                        logMessage(`🏢 Parou em: ${cellEffect.label}! Responda à pergunta do professor.`);
+                    }
+                    
+                    // Garante limites mínimos e máximos pós-efeito
+                    if(playerPositions[currentPlayer] < 1) playerPositions[currentPlayer] = 1;
+                    if(playerPositions[currentPlayer] >= boardSize) playerPositions[currentPlayer] = boardSize;
+                    
+                    updatePawns();
+                }
+
+                // Passa o turno
+                currentPlayer = (currentPlayer + 1) % numPlayers;
+                updateTurnDisplay();
+                isRolling = false;
+            }, 600);
+        }
+
+        // Inicia o tabuleiro ao abrir a página
+        initGame();
+    </script>
+</body>
+</html>
