@@ -30,19 +30,18 @@
             color: #e0e0e0;
         }
         .games-grid {
-            display: flex;
-            gap: 30px;
-            max-width: 1050px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            max-width: 1200px;
             width: 100%;
             justify-content: center;
-            flex-wrap: wrap;
         }
         .game-card {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
             border: 2px solid rgba(255, 255, 255, 0.2);
             border-radius: 15px;
-            width: 310px;
             padding: 25px;
             text-align: center;
             box-shadow: 0 8px 32px rgba(0,0,0,0.3);
@@ -50,6 +49,7 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            min-height: 380px;
         }
         .game-card:hover {
             transform: translateY(-10px);
@@ -128,11 +128,12 @@
             </div>
             <a href="pronuncia.html" class="play-btn">Jogar Agora ▶</a>
         </div>
-    <div class="game-card">
+
+        <div class="game-card">
             <div>
                 <div class="game-icon">🏎️</div>
                 <h2>Pit Stop Challenge</h2>
-                <p>Pilote pela estrada coletando moedas. Mas atenção: quando o combustível acabar, use seu inglês para fazer o pit stop perfeito!</p>
+                <p>Pilote pela estrada coletando moedas usando as setas. Quando o combustível acabar, use seu inglês para fazer o pit stop perfeito!</p>
             </div>
             <a href="corrida.html" class="play-btn">Jogar Agora ▶</a>
         </div>
