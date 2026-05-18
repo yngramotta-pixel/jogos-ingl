@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<!-- saved from url=(0063)file:///C:/Users/yngra/Downloads/gemini-code-1779121602623.html -->
+<html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pit Stop Challenge: Vocab Race</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #2c3e50;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        #game-container {
+            position: relative;
+            width: 400px;
+            height: 500px;
+            background-color: #34495e;
+            border: 4px solid #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .ui-panel {
+            display: flex;
+            justify-content: space-between;
+            width: 400px;
+            padding: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            background: #16a085;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        /* Pista e Faixas */
+        .line {
+            position: absolute;
+            width: 10px;
+            height: 80px;
+            background: #fff;
+            left: 195px;
+        }
+        /* Itens da Corrida */
+        #car {
+            position: absolute;
+            width: 40px;
+            height: 70px;
+            background-color: #e74c3c;
+            bottom: 20px;
+            left: 180px;
+            border-radius: 5px;
+            border: 2px solid #c0392b;
+            transition: left 0.1s linear;
+        }
+        /* Detalhes do Carro */
+        #car::before { content: ''; position: absolute; width: 30px; height: 15px; background: #3498db; left: 5px; top: 15px; border-radius: 3px; }
+        .coin {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background-color: #f1c40f;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        /* Tela de Pit Stop */
+        #pit-stop-overlay {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+            z-index: 10;
+        }
+        .pit-title { color: #e67e22; font-size: 24px; font-weight: bold; margin-bottom: 15px; animation: blink 1s infinite; }
+        .place-graphic { font-size: 80px; background: #fff; border-radius: 10px; width: 120px; height: 120px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+        .option-btn { background: #34495e; border: 2px solid #7f8c8d; color: #fff; padding: 12px; font-size: 16px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: all 0.2s; }
+        .option-btn:hover { background: #7f8c8d; }
+        
+        /* Controles Mobile */
+        .controls { display: flex; gap: 40px; margin-top: 15px; }
+        .btn-ctrl { background: #16a085; border: none; color: white; padding: 15px 30px; font-size: 20px; border-radius: 10px; cursor: pointer; font-weight: bold; user-select: none; }
+        .btn-ctrl:active { background: #117a65; }
+
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    </style>
+</head>
+<body>
+
+    <div class="ui-panel">
+        <span>Moedas: <span id="score">425</span></span>
+        <span>Próximo Pit Stop: <span id="distance">0</span>m</span>
+    </div>
+
+    <div id="game-container">
+        <div class="line" style="top: 276px;"></div>
+        <div class="line" style="top: 484px;"></div>
+        <div class="line" style="top: 76px;"></div>
+        <div class="line" style="top: 276px;"></div>
+
+        <div id="car" style="left: 90px;"></div>
+        <div id="coin-element" class="coin" style="top: 270px; left: 40px;">🪙</div>
+
+        <div id="pit-stop-overlay" style="display: flex;">
+            <div class="pit-title">🔧 PIT STOP! ANSWER TO FUEL UP</div>
+            <p style="margin-bottom: 10px; color: #bdc3c7;">Que lugar da cidade é este?</p>
+            <div class="place-graphic" id="pit-emoji">⛪</div>
+            <div class="options-grid" id="pit-options"><button class="option-btn">sports center</button><button class="option-btn">drugstore</button><button class="option-btn">port</button><button class="option-btn">church</button></div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn-ctrl" id="left-btn">◀ Left</button>
+        <button class="btn-ctrl" id="right-btn">Right ▶</button>
+    </div>
+    <p style="margin-top: 15px; color: #bdc3c7; font-size: 14px;">Use as Setas (◀ ▶) do teclado ou toque nos botões na tela.</p>
+
+    <script>
+        const places = [
+            { english: "bakery", portuguese: "padaria", emoji: "🥖" },
+            { english: "church", portuguese: "igreja", emoji: "⛪" },
+            { english: "bus stop", portuguese: "ponto de ônibus", emoji: "🚌" },
+            { english: "sports center", portuguese: "centro esportivo", emoji: "⚽" },
+            { english: "gym", portuguese: "academia", emoji: "🏋️" },
+            { english: "drugstore", portuguese: "farmácia", emoji: "💊" },
+            { english: "grocery store", portuguese: "mercado", emoji: "🛒" },
+            { english: "school", portuguese: "escola", emoji: "🏫" },
+            { english: "hospital", portuguese: "hospital", emoji: "🏥" },
+            { english: "port", portuguese: "porto", emoji: "🚢" }
+        ];
+
+        let score = 0;
+        let distanceToPit = 100;
+        let carLeft = 180;
+        let gameActive = true;
+        let speed = 4;
+
+        const car = document.getElementById('car');
+        const coinElement = document.getElementById('coin-element');
+        const lines = document.querySelectorAll('.line');
+
+        // Configuração de posições dos elementos da pista
+        let coinPos = { top: -50, left: 100 };
+        let linePositions = [-100, 100, 300, 500];
+
+        // Controles de Movimentação
+        document.addEventListener('keydown', (e) => {
+            if (!gameActive) return;
+            if (e.key === 'ArrowLeft' && carLeft > 20) { carLeft -= 30; }
+            if (e.key === 'ArrowRight' && carLeft < 340) { carLeft += 30; }
+            car.style.left = carLeft + 'px';
+        });
+
+        document.getElementById('left-btn').addEventListener('touchstart', () => { if(gameActive && carLeft > 20) { carLeft -= 30; car.style.left = carLeft + 'px'; } });
+        document.getElementById('right-btn').addEventListener('touchstart', () => { if(gameActive && carLeft < 340) { carLeft += 30; car.style.left = carLeft + 'px'; } });
+        document.getElementById('left-btn').addEventListener('click', () => { if(gameActive && carLeft > 20) { carLeft -= 30; car.style.left = carLeft + 'px'; } });
+        document.getElementById('right-btn').addEventListener('click', () => { if(gameActive && carLeft < 340) { carLeft += 30; car.style.left = carLeft + 'px'; } });
+
+        // Loop Principal da Corrida
+        function updateGame() {
+            if (!gameActive) return;
+
+            // 1. Mover as linhas da estrada (Efeito de velocidade)
+            linePositions = linePositions.map(pos => {
+                let newPos = pos + speed;
+                if (newPos > 500) newPos = -100;
+                return newPos;
+            });
+            lines.forEach((line, index) => { line.style.top = linePositions[index] + 'px'; });
+
+            // 2. Mover a Moeda
+            coinPos.top += speed;
+            if (coinPos.top > 500) {
+                coinPos.top = -50;
+                coinPos.left = Math.floor(Math.random() * 11) * 30 + 40; // Posição aleatória na estrada
+            }
+            coinElement.style.top = coinPos.top + 'px';
+            coinElement.style.left = coinPos.left + 'px';
+
+            // 3. Sistema de distância para o Pit Stop
+            distanceToPit -= 0.2;
+            document.getElementById('distance').innerText = Math.max(0, Math.floor(distanceToPit));
+
+            if (distanceToPit <= 0) {
+                triggerPitStop();
+            }
+
+            // 4. Checar Colisão com a Moeda
+            if (coinPos.top > 410 && coinPos.top < 480 && Math.abs(coinPos.left - carLeft) < 35) {
+                score += 10;
+                document.getElementById('score').innerText = score;
+                coinPos.top = -50; // Reseta moeda
+                coinPos.left = Math.floor(Math.random() * 11) * 30 + 40;
+            }
+
+            requestAnimationFrame(updateGame);
+        }
+
+        // Ativa o Pit Stop Pedagógico
+        function triggerPitStop() {
+            gameActive = false;
+            const overlay = document.getElementById('pit-stop-overlay');
+            overlay.style.display = 'flex';
+
+            // Seleciona item correto aleatório
+            let correctItem = places[Math.floor(Math.random() * places.length)];
+            document.getElementById('pit-emoji').innerText = correctItem.emoji;
+
+            // Gerar alternativas erradas
+            let duds = places.filter(p => p.english !== correctItem.english).sort(() => Math.random() - 0.5).slice(0, 3);
+            let choices = [correctItem, ...duds].sort(() => Math.random() - 0.5);
+
+            const optionsGrid = document.getElementById('pit-options');
+            optionsGrid.innerHTML = '';
+
+            choices.forEach(choice => {
+                let btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = choice.english; // Exibe em inglês para o aluno associar com a imagem
+                btn.onclick = () => {
+                    if (choice.english === correctItem.english) {
+                        btn.style.background = '#2ecc71';
+                        setTimeout(() => {
+                            overlay.style.display = 'none';
+                            distanceToPit = 100; // Reseta próxima parada
+                            gameActive = true;
+                            speed += 0.5; // Aumenta levemente a velocidade para ficar mais desafiador
+                            requestAnimationFrame(updateGame);
+                        }, 800);
+                    } else {
+                        btn.style.background = '#e74c3c';
+                        score = Math.max(0, score - 5); // Penalidade leve em pontos
+                        document.getElementById('score').innerText = score;
+                    }
+                };
+                optionsGrid.appendChild(btn);
+            });
+        }
+
+        // Inicia o loop
+        requestAnimationFrame(updateGame);
+    </script>
+
+</body></html>
