@@ -28,7 +28,7 @@
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
             gap: 20px; 
             width: 100%; 
-            max-width: 1100px; 
+            max-width: 1200px; 
             margin-top: 20px;
         }
         .menu-card { 
@@ -44,11 +44,14 @@
             justify-content: space-between;
             min-height: 380px;
         }
-        .menu-card img, .menu-card .game-icon { 
+        .menu-card .game-icon { 
             width: 70px; 
             height: 70px; 
             margin-bottom: 15px; 
-            object-fit: contain;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
         }
         .menu-card h3 { color: #f59e0b; font-size: 18px; margin-bottom: 10px; font-weight: bold; }
         .menu-card p { font-size: 13px; color: #cbd5e1; line-height: 1.5; margin-bottom: 15px; flex-grow: 1; }
@@ -117,48 +120,58 @@
 <body>
 
     <div id="screen-menu" class="screen active">
+        <h1 style="color: #f59e0b; font-size: 32px; text-shadow: 0 3px 6px rgba(0,0,0,0.5); text-align: center; margin-bottom: 5px;">Plataforma de Jogos Pedagógicos 🎓</h1>
+        <p style="color: #9ca3af; text-align: center; margin-bottom: 20px;">Selecione um jogo abaixo para começar a praticar!</p>
+        
         <div class="menu-grid">
             
             <div class="menu-card">
-                <div class="game-icon" style="font-size: 50px;">🦦</div>
+                <div class="game-icon">🦦</div>
                 <h3>CapyCode: Rumo ao Parque</h3>
                 <p>Customiza o teu avatar e usa blocos visuais de comando em inglês para guiar a capivara até ao parque, evitando os obstáculos de forma super fofa!</p>
                 <button class="play-btn" onclick="alert('Iniciando CapyCode...')">Jogar Agora ►</button>
             </div>
 
             <div class="menu-card">
-                <div class="game-icon" style="font-size: 50px;">🏙️</div>
+                <div class="game-icon">🏙️</div>
                 <h3>City Adventure</h3>
-                <p>Um jogo de tabuleiro virtual interativo para 2 a 4 jogadores. Gire o dado, avance as casas e complete os desafios da cidade com o seu ônibus escolar!</p>
-                <button class="play-btn" onclick="switchScreen('screen-bus'); initBusGame();">Jogar Agora ►</button>
+                <p>Um jogo de tabuleiro virtual interativo para 2 a 4 jogadores. Gire o dado, avance as casas e complete os desafios da cidade.</p>
+                <button class="play-btn" onclick="alert('Iniciando City Adventure...')">Jogar Agora ►</button>
             </div>
 
             <div class="menu-card">
-                <div class="game-icon" style="font-size: 50px;">🗣️</div>
+                <div class="game-icon">🗣️</div>
                 <h3>City Sounds</h3>
                 <p>Ouça atentamente a pronúncia nativa dos lugares da cidade em inglês e vença os 3 níveis progressivos de audição e escrita.</p>
                 <button class="play-btn" onclick="alert('Iniciando City Sounds...')">Jogar Agora ►</button>
             </div>
 
             <div class="menu-card">
-                <div class="game-icon" style="font-size: 50px;">🏎️</div>
+                <div class="game-icon">🏎️</div>
                 <h3>Pit Stop Challenge</h3>
                 <p>Pilote pela estrada coletando moedas usando as setas. Quando o combustível acabar, use seu inglês para fazer o pit stop perfeito!</p>
                 <button class="play-btn" onclick="alert('Iniciando Pit Stop Challenge...')">Jogar Agora ►</button>
             </div>
 
             <div class="menu-card">
-                <div class="game-icon" style="font-size: 50px;">🚨</div>
+                <div class="game-icon">🚨</div>
                 <h3>Teletube Escape</h3>
                 <p>O robô está preso dentro do tubo! Corra contra o relógio para traduzir os locais antes que o tempo acabe.</p>
                 <button class="play-btn" onclick="alert('Iniciando Teletube Escape...')">Jogar Agora ►</button>
             </div>
 
             <div class="menu-card">
-                <div class="game-icon" style="font-size: 50px;">🔤</div>
+                <div class="game-icon">🔤</div>
                 <h3>City Hangman</h3>
                 <p>O clássico jogo da forca! Analise as dicas de vocabulário e escolha as letras certas de A a Z para descobrir as palavras.</p>
                 <button class="play-btn" onclick="alert('Iniciando City Hangman...')">Jogar Agora ►</button>
+            </div>
+
+            <div class="menu-card" style="border: 1px solid #f59e0b;">
+                <div class="game-icon">🚌</div>
+                <h3 style="color: #f59e0b;">School Bus Safety</h3>
+                <p>Pratique inglês e leis de trânsito! Conduza o ônibus pelas ruas da cidade, responda quizzes nas paradas e evite multas nos semáforos.</p>
+                <button class="play-btn" style="background: #eab308; color: #000;" onclick="switchScreen('screen-bus'); initBusGame();">Jogar Agora ►</button>
             </div>
 
         </div>
@@ -207,7 +220,7 @@
             document.getElementById(screenId).classList.add('active');
         }
 
-        /* Lógica Modificada do Mapa (Pista em S sem Atalhos Laterais) */
+        /* Pista em S - Sem atalhos ou falhas de movimentação */
         const cityMatrix = [
             ['H', 'R', 'R', 'R', 'T', 'R', 'O', 'B', 'B'],
             ['B', 'B', 'B', 'B', 'B', 'R', 'B', 'B', 'B'],
@@ -408,7 +421,6 @@
             });
         }
 
-        /* Verificação das Respostas */
         function checkQuizAnswer(selected, correct, stopKey) {
             const quizBox = document.getElementById('quiz-container');
             if (selected === correct) {
