@@ -137,6 +137,341 @@
             </div>
             <a href="corrida.html" class="play-btn">Jogar Agora ▶</a>
         </div>
+        <!DOCTYPE html>
+<!-- saved from url=(0063)file:///C:/Users/yngra/Downloads/gemini-code-1779135888176.html -->
+<html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hangman Challenge: City Places</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1e272c;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .game-title {
+            text-align: center;
+            color: #f1c40f;
+            margin-bottom: 20px;
+            font-size: 24px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        .main-container {
+            background: #2c3e50;
+            max-width: 600px;
+            width: 100%;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        /* Dica do lugar e boneco/vidas */
+        .hint-box {
+            font-size: 18px;
+            color: #bdc3c7;
+            text-align: center;
+            font-weight: 600;
+        }
+        .lives-box {
+            font-size: 18px;
+            background: #c0392b;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+        /* Espaços das letras ocultas */
+        .word-display {
+            display: flex;
+            gap: 12px;
+            margin: 10px 0;
+            font-size: 2rem;
+            font-weight: bold;
+            letter-spacing: 4px;
+            min-height: 45px;
+        }
+        .letter-slot {
+            border-bottom: 4px solid #fff;
+            width: 30px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+        /* Feedback animado WOW */
+        #feedback-toast {
+            height: 30px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #2ecc71;
+            text-shadow: 0 0 8px rgba(46,204,113,0.6);
+            transition: all 0.2s ease;
+            opacity: 0;
+            transform: scale(0.8);
+        }
+        #feedback-toast.show {
+            opacity: 1;
+            transform: scale(1.2);
+        }
+        /* Teclado Virtual A-Z */
+        .keyboard {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            width: 100%;
+            margin-top: 10px;
+        }
+        @media (max-width: 450px) {
+            .keyboard { grid-template-columns: repeat(6, 1fr); }
+        }
+        .key {
+            background: #34495e;
+            border: 2px solid #7f8c8d;
+            color: white;
+            border-radius: 6px;
+            padding: 12px 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            min-height: 50px;
+        }
+        .key:hover:not(.disabled) {
+            background: #7f8c8d;
+            border-color: #f1c40f;
+        }
+        /* Estados das teclas após seleção */
+        .key.correct {
+            background-color: #27ae60 !important;
+            border-color: #2ecc71 !important;
+            color: #fff;
+        }
+        .key.wrong {
+            background-color: #7f8c8d !important;
+            border-color: #95a5a6 !important;
+            color: #bdc3c7;
+            opacity: 0.6;
+        }
+        /* Ícones internos da tecla (X ou Check) */
+        .key-status {
+            font-size: 11px;
+            margin-top: 2px;
+            font-weight: 800;
+        }
+        /* Tela de Fim de Jogo */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 10;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+        }
+        .overlay h2 { font-size: 32px; margin-bottom: 15px; }
+        .overlay p { font-size: 18px; margin-bottom: 25px; color: #bdc3c7; }
+        .reset-btn {
+            background: #f1c40f;
+            color: #000;
+            border: none;
+            padding: 12px 35px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .reset-btn:hover { transform: scale(1.05); }
+    </style>
+</head>
+<body>
+
+    <h1 class="game-title">🔤 Hangman Challenge: City Places</h1>
+
+    <div class="main-container">
+        <div class="hint-box" id="hint-text">Dica: Onde compramos pães e doces deliciosos de manhã 🥖</div>
+        <div class="lives-box">Chances restantes: <span id="lives-count">6</span></div>
+        
+        <div id="feedback-toast">WOW! ✔</div>
+
+        <div class="word-display" id="word-container"><div class="letter-slot"></div><div class="letter-slot"></div><div class="letter-slot"></div><div class="letter-slot"></div><div class="letter-slot"></div><div class="letter-slot"></div></div>
+
+        <div class="keyboard" id="keyboard-container"><button class="key"><span>A</span><span class="key-status"></span></button><button class="key"><span>B</span><span class="key-status"></span></button><button class="key"><span>C</span><span class="key-status"></span></button><button class="key"><span>D</span><span class="key-status"></span></button><button class="key"><span>E</span><span class="key-status"></span></button><button class="key"><span>F</span><span class="key-status"></span></button><button class="key"><span>G</span><span class="key-status"></span></button><button class="key"><span>H</span><span class="key-status"></span></button><button class="key"><span>I</span><span class="key-status"></span></button><button class="key"><span>J</span><span class="key-status"></span></button><button class="key"><span>K</span><span class="key-status"></span></button><button class="key"><span>L</span><span class="key-status"></span></button><button class="key"><span>M</span><span class="key-status"></span></button><button class="key"><span>N</span><span class="key-status"></span></button><button class="key"><span>O</span><span class="key-status"></span></button><button class="key"><span>P</span><span class="key-status"></span></button><button class="key"><span>Q</span><span class="key-status"></span></button><button class="key"><span>R</span><span class="key-status"></span></button><button class="key"><span>S</span><span class="key-status"></span></button><button class="key"><span>T</span><span class="key-status"></span></button><button class="key"><span>U</span><span class="key-status"></span></button><button class="key"><span>V</span><span class="key-status"></span></button><button class="key"><span>W</span><span class="key-status"></span></button><button class="key"><span>X</span><span class="key-status"></span></button><button class="key"><span>Y</span><span class="key-status"></span></button><button class="key"><span>Z</span><span class="key-status"></span></button></div>
+    </div>
+
+    <div class="overlay" id="end-screen" style="display: none;">
+        <h2 id="end-title">Resultado</h2>
+        <p id="end-desc">Mensagem informativa aqui.</p>
+        <button class="reset-btn" onclick="initGame()">Próxima Palavra 🔄</button>
+    </div>
+
+    <script>
+        const placesDatabase = [
+            { word: "BAKERY", hint: "Onde compramos pães e doces deliciosos de manhã 🥖" },
+            { word: "SCHOOL", hint: "O local para onde vamos estudar, aprender e ver amigos 🏫" },
+            { word: "CHURCH", hint: "Lugar para orações, reflexões e celebrações religiosas ⛪" },
+            { word: "HOSPITAL", hint: "Lugar com médicos e enfermeiros para cuidar da saúde 🏥" },
+            { word: "GYM", hint: "Onde as pessoas vão malhar, correr e fazer exercícios 🏋️" },
+            { word: "PORT", hint: "Local à beira-mar onde os grandes navios atracam 🚢" },
+            { word: "DRUGSTORE", hint: "Onde vamos comprar remédios quando estamos doentes 💊" },
+            { word: "BUS STOP", hint: "Ponto na calçada onde esperamos o ônibus chegar 🚌" }
+        ];
+
+        let selectedPlace;
+        let secretWord = "";
+        let guessedLetters = [];
+        let remainingLives = 6;
+
+        const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+
+        function initGame() {
+            // Seleciona um lugar aleatório da lista
+            selectedPlace = placesDatabase[Math.floor(Math.random() * placesDatabase.length)];
+            secretWord = selectedPlace.word;
+            guessedLetters = [];
+            remainingLives = 6;
+
+            // Se o lugar tiver espaço (ex: BUS STOP), já adiciona o espaço como adivinhado automaticamente
+            if(secretWord.includes(" ")) {
+                guessedLetters.push(" ");
+            }
+
+            document.getElementById('hint-text').innerText = `Dica: ${selectedPlace.hint}`;
+            document.getElementById('lives-count').innerText = remainingLives;
+            document.getElementById('end-screen').style.display = 'none';
+            document.getElementById('feedback-toast').classList.remove('show');
+
+            renderWordSlots();
+            renderKeyboard();
+        }
+
+        function renderWordSlots() {
+            const container = document.getElementById('word-container');
+            container.innerHTML = "";
+
+            for (let char of secretWord) {
+                let slot = document.createElement('div');
+                if (char === " ") {
+                    slot.innerHTML = "&nbsp;&nbsp;"; // Espaço visível entre palavras compostas
+                    slot.style.borderBottom = "none";
+                } else if (guessedLetters.includes(char)) {
+                    slot.innerText = char;
+                    slot.classList.add('letter-slot');
+                } else {
+                    slot.innerText = "";
+                    slot.classList.add('letter-slot');
+                }
+                container.appendChild(slot);
+            }
+        }
+
+        function renderKeyboard() {
+            const container = document.getElementById('keyboard-container');
+            container.innerHTML = "";
+
+            alphabet.forEach(letter => {
+                let btn = document.createElement('button');
+                btn.className = 'key';
+                
+                // Estrutura interna para colocar a Letra em cima e o Status (Check/X) embaixo
+                let letterSpan = document.createElement('span');
+                letterSpan.innerText = letter;
+                btn.appendChild(letterSpan);
+
+                let statusSpan = document.createElement('span');
+                statusSpan.className = 'key-status';
+                statusSpan.innerText = "";
+                btn.appendChild(statusSpan);
+
+                btn.onclick = () => handleGuess(letter, btn, statusSpan);
+                container.appendChild(btn);
+            });
+        }
+
+        function handleGuess(letter, button, statusElement) {
+            if (guessedLetters.includes(letter) || remainingLives <= 0) return;
+
+            guessedLetters.push(letter);
+            button.classList.add('disabled');
+            button.disabled = true;
+
+            if (secretWord.includes(letter)) {
+                // ACERTOU A LETRA!
+                button.classList.add('correct');
+                statusElement.innerText = "✔";
+                
+                // Dispara efeito "WOW" na tela
+                triggerWowEffect();
+                renderWordSlots();
+                checkWin();
+            } else {
+                // ERROU A LETRA!
+                button.classList.add('wrong');
+                statusElement.innerText = "❌";
+                remainingLives--;
+                document.getElementById('lives-count').innerText = remainingLives;
+                checkLose();
+            }
+        }
+
+        function triggerWowEffect() {
+            const toast = document.getElementById('feedback-toast');
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 600);
+        }
+
+        function checkWin() {
+            // Verifica se todas as letras da palavra secreta já estão na lista de jogadas
+            const won = secretWord.split("").every(char => guessedLetters.includes(char));
+            if (won) {
+                setTimeout(() => {
+                    showEndScreen("🎉 PARABÉNS! 🎉", `Você descobriu a palavra "${secretWord}" com sucesso!`, "#10ac84");
+                }, 500);
+            }
+        }
+
+        function checkLose() {
+            if (remainingLives <= 0) {
+                setTimeout(() => {
+                    showEndScreen("☠️ GAME OVER ☠️", `Ficou sem chances! A palavra secreta era: "${secretWord}".`, "#ff5252");
+                }, 500);
+            }
+        }
+
+        function showEndScreen(title, text, color) {
+            const screen = document.getElementById('end-screen');
+            const titleEl = document.getElementById('end-title');
+            const descEl = document.getElementById('end-desc');
+
+            titleEl.innerText = title;
+            titleEl.style.color = color;
+            descEl.innerText = text;
+            screen.style.display = 'flex';
+        }
+
+        // Inicializa o jogo ao carregar
+        initGame();
+    </script>
+
+</body></html>
     </main>
 
     <footer>
