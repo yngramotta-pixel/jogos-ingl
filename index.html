@@ -3,528 +3,459 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teacher's Arcade - English Games</title>
+    <title>Plataforma de Jogos Educativos 🎮</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             color: #fff;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: flex-start;
             padding: 40px 20px;
         }
-        header {
-            text-align: center;
-            margin-bottom: 40px;
+
+        /* Sistema de Telas Dinâmico */
+        .screen { display: none; width: 100%; max-width: 1200px; }
+        .screen.active { display: flex; flex-direction: column; align-items: center; }
+
+        /* Menu Principal (Grid Padronizado) */
+        .menu-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 24px; 
+            width: 100%; 
+            margin-top: 20px;
         }
-        header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            text-shadow: 0 4px 6px rgba(0,0,0,0.2);
-        }
-        header p {
-            font-size: 1.1rem;
-            color: #e0e0e0;
-        }
-        .games-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
-            max-width: 1200px;
-            width: 100%;
-            justify-content: center;
-        }
-        .game-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 15px;
-            padding: 25px;
-            text-align: center;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-            transition: transform 0.3s ease, border-color 0.3s ease;
-            display: flex;
-            flex-direction: column;
+        .menu-card { 
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); 
+            border: 1px solid #334155; 
+            border-radius: 16px; 
+            padding: 30px 20px; 
+            text-align: center; 
+            box-shadow: 0 15px 30px rgba(0,0,0,0.5); 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center;
             justify-content: space-between;
-            min-height: 380px;
-        }
-        .game-card:hover {
-            transform: translateY(-10px);
-            border-color: #2ecc71;
-            background: rgba(255, 255, 255, 0.15);
-        }
-        .game-icon {
-            font-size: 4rem;
-            margin-bottom: 15px;
-        }
-        .game-card h2 {
-            font-size: 1.4rem;
-            margin-bottom: 12px;
-            color: #f1c40f;
-        }
-        .game-card p {
-            font-size: 0.95rem;
-            color: #ecf0f1;
-            margin-bottom: 20px;
-            line-height: 1.4;
-            flex-grow: 1;
-        }
-        .play-btn {
-            display: inline-block;
-            background-color: #2ecc71;
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 25px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.2s;
-            box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);
-            text-decoration: none;
-        }
-        .play-btn:hover {
-            background-color: #27ae60;
-        }
-        
-        /* Botão Sair Global */
-        .btn-back {
-            display: none;
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: #e74c3c;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-weight: bold;
-            cursor: pointer;
-            z-index: 100;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
-        .btn-back:hover { background: #c0392b; }
-
-        /* Telas Container dos Jogos */
-        .game-screen {
-            display: none;
-            width: 100%;
-            max-width: 800px;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            animation: fadeIn 0.4s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Placeholder de telas em desenvolvimento */
-        .dev-placeholder {
-            background: rgba(0,0,0,0.4);
-            padding: 40px;
-            border-radius: 15px;
-            text-align: center;
-            border: 2px dashed #f1c40f;
-        }
-
-        /* ==================== ESTILOS: HANGMAN CHALLENGE ==================== */
-        .game-title {
-            text-align: center;
-            color: #f1c40f;
-            margin-bottom: 20px;
-            font-size: 28px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-        }
-        .main-container {
-            background: #2c3e50;
-            max-width: 600px;
-            width: 100%;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-        }
-        .hint-box {
-            font-size: 18px;
-            color: #bdc3c7;
-            text-align: center;
-            font-weight: 600;
-        }
-        .lives-box {
-            font-size: 18px;
-            background: #c0392b;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-weight: bold;
-        }
-        .word-display {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin: 10px 0;
-            font-size: 2rem;
-            font-weight: bold;
-            min-height: 45px;
-            width: 100%;
-        }
-        .letter-slot {
-            border-bottom: 4px solid #fff;
-            width: 30px;
-            text-align: center;
-            text-transform: uppercase;
-        }
-        #feedback-toast {
-            height: 30px;
-            font-size: 20px;
-            font-weight: bold;
-            color: #2ecc71;
-            text-shadow: 0 0 8px rgba(46,204,113,0.6);
-            transition: all 0.2s ease;
-            opacity: 0;
-            transform: scale(0.8);
-        }
-        #feedback-toast.show {
-            opacity: 1;
-            transform: scale(1.2);
-        }
-        .keyboard {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 8px;
-            width: 100%;
-            margin-top: 10px;
-        }
-        @media (max-width: 450px) {
-            .keyboard { grid-template-columns: repeat(6, 1fr); }
-        }
-        .key {
-            background: #34495e;
-            border: 2px solid #7f8c8d;
-            color: white;
-            border-radius: 6px;
-            padding: 12px 5px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            text-transform: uppercase;
-            transition: all 0.2s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            min-height: 50px;
-        }
-        .key:hover:not(:disabled) {
-            background: #7f8c8d;
-            border-color: #f1c40f;
-        }
-        .key.correct {
-            background-color: #27ae60 !important;
-            border-color: #2ecc71 !important;
-            color: #fff;
-        }
-        .key.wrong {
-            background-color: #7f8c8d !important;
-            border-color: #95a5a6 !important;
-            color: #bdc3c7;
-            opacity: 0.6;
-        }
-        .key-status {
-            font-size: 11px;
-            margin-top: 2px;
-            font-weight: 800;
-        }
-        .overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9);
-            z-index: 110;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 20px;
-        }
-        .overlay h2 { font-size: 32px; margin-bottom: 15px; }
-        .overlay p { font-size: 18px; margin-bottom: 25px; color: #bdc3c7; }
-        .reset-btn {
-            background: #f1c40f;
-            color: #000;
-            border: none;
-            padding: 12px 35px;
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 25px;
-            cursor: pointer;
+            min-height: 420px;
             transition: transform 0.2s;
         }
-        .reset-btn:hover { transform: scale(1.05); }
-
-        footer {
-            margin-top: auto;
-            padding-top: 40px;
-            font-size: 0.85rem;
-            color: #bdc3c7;
-            text-align: center;
+        .menu-card:hover { transform: translateY(-5px); }
+        .menu-card .game-icon { 
+            font-size: 50px;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
         }
+        
+        /* CORREÇÃO: Todos os títulos agora compartilham a mesma cor (Branco) */
+        .menu-card h3 { color: #ffffff; font-size: 20px; margin-bottom: 12px; font-weight: bold; }
+        .menu-card p { font-size: 13.5px; color: #cbd5e1; line-height: 1.6; margin-bottom: 20px; flex-grow: 1; }
+         
+        .play-btn { 
+            background: #22c55e; 
+            color: white; 
+            border: none; 
+            padding: 12px 24px; 
+            border-radius: 25px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            width: 85%; 
+            transition: transform 0.2s, background 0.2s; 
+            font-size: 15px;
+        }
+        .play-btn:hover { background: #16a34a; transform: scale(1.03); }
+
+        /* Layout Base das Telas de Jogo */
+        .game-header {
+            display: flex;
+            width: 100%;
+            max-width: 980px;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .game-title { font-size: 24px; font-weight: bold; color: #f59e0b; }
+        .btn-back { background: #334155; color: white; border: 1px solid #475569; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-weight: bold; transition: background 0.2s; }
+        .btn-back:hover { background: #475569; }
+
+        .game-container { display: flex; gap: 25px; width: 100%; max-width: 980px; background: #1e293b; padding: 25px; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.6); border: 1px solid #334155; flex-wrap: wrap; justify-content: center; }
+
+        /* Estilos do Tabuleiro (City Adventure / CapyCode) */
+        .map-wrapper { position: relative; background: #2d3748; border: 4px solid #4a5568; border-radius: 12px; padding: 12px; box-shadow: inset 0 4px 10px rgba(0,0,0,0.5); }
+        .map-grid { display: grid; grid-template-columns: repeat(9, 52px); grid-template-rows: repeat(9, 52px); gap: 2px; background: #232d3f; padding: 2px; border-radius: 6px; }
+        .cell { display: flex; align-items: center; justify-content: center; font-size: 24px; border-radius: 4px; position: relative; background-color: #334155; }
+        .cell.building-green { background-color: #059669; border: 2px solid #10b981; }
+        .cell.building-darkgreen { background-color: #047857; }
+        .cell.bus-stop { background-color: #2563eb; border: 2px solid #f59e0b; }
+        .cell.traffic-light-red { background-color: #2563eb; border: 2px solid #dc2626; }
+        .cell.traffic-light-green { background-color: #2563eb; border: 2px solid #16a34a; }
+        .cell.obstacle { background-color: #1e293b; }
+        .actor { font-size: 28px; position: absolute; z-index: 10; transition: all 0.18s ease-out; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+
+        /* Painel Lateral de Controle */
+        .side-panel { flex: 1; min-width: 280px; max-width: 340px; display: flex; flex-direction: column; gap: 15px; background: #0f172a; padding: 20px; border-radius: 14px; border: 1px solid #334155; }
+        .nav-buttons { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-width: 170px; margin: 10px auto; }
+        .nav-btn { background: #2563eb; border: none; color: white; padding: 14px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 18px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .nav-btn:hover { background: #1d4ed8; }
+        .event-log { background: #1e293b; padding: 10px 14px; border-radius: 8px; font-size: 13.5px; text-align: center; color: #cbd5e1; border-left: 4px solid #f59e0b; font-style: italic; min-height: 56px; display: flex; align-items: center; justify-content: center; }
+
+        /* Elementos de UI dos Novos Módulos Pop-up */
+        .generic-play-zone { display: flex; flex-direction: column; align-items: center; gap: 15px; width: 100%; max-width: 600px; background: #0f172a; padding: 30px; border-radius: 16px; border: 1px solid #334155; }
+        .game-input { width: 100%; max-width: 300px; padding: 12px; border-radius: 8px; border: 1px solid #475569; background: #1e293b; color: white; font-size: 16px; text-align: center; outline: none; }
+        .game-input:focus { border-color: #22c55e; }
+        .btn-submit { background: #22c55e; color: white; border: none; padding: 12px 30px; font-weight: bold; border-radius: 8px; cursor: pointer; font-size: 16px; transition: background 0.2s; }
+        .btn-submit:hover { background: #16a34a; }
+        .word-display { font-size: 32px; font-weight: bold; letter-spacing: 6px; color: #fbbf24; margin: 15px 0; }
+
+        /* Caixa de Quiz */
+        .quiz-box { background: #1e293b; padding: 15px; border-radius: 12px; border-left: 5px solid #f59e0b; display: none; flex-direction: column; gap: 10px; }
+        .option-btn { background: #334155; color: white; border: 1px solid #475569; padding: 11px; border-radius: 8px; cursor: pointer; text-align: left; font-weight: 600; width: 100%; font-size: 13.5px; }
+        .option-btn:hover { background: #475569; }
+
+        /* Overlays globais */
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.95); z-index: 100; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; }
+        .restart-btn { background: #f59e0b; color: #000; border: none; padding: 12px 35px; font-size: 16px; font-weight: bold; border-radius: 25px; cursor: pointer; margin-top: 15px; transition: background 0.2s; }
+        .restart-btn:hover { background: #d97706; }
     </style>
 </head>
 <body>
 
-    <button class="btn-back" id="global-back-btn" onclick="goToMenu()">◀ Voltar ao Menu</button>
-
-    <div id="main-menu" style="width: 100%; max-width: 1200px;">
-        <header>
-            <h1>🌍 Teacher's Arcade</h1>
-            <p>Escolha uma missão abaixo e pratique seu inglês!</p>
-        </header>
-
-        <main class="games-grid">
-            <div class="game-card">
-                <div>
-                    <div class="game-icon">🔤</div>
-                    <h2>Hangman Challenge</h2>
-                    <p>Descubra o nome secreto dos locais urbanos antes de suas chances acabarem!</p>
-                </div>
-                <button class="play-btn" onclick="openGame('hangman')">Jogar Agora ▶</button>
+    <div id="screen-menu" class="screen active">
+        <div class="menu-grid">
+            <div class="menu-card">
+                <div class="game-icon">🦦</div>
+                <h3>CapyCode: Rumo ao Parque</h3>
+                <p>Use blocos e linhas de comando em inglês (UP, DOWN, LEFT, RIGHT) para programar e guiar a capivara até o parque!</p>
+                <button class="play-btn" onclick="launchGame('capycode')">Jogar Agora ►</button>
             </div>
 
-            <div class="game-card">
-                <div>
-                    <div class="game-icon">🦫</div>
-                    <h2>CapyCode: Rumo ao Parque</h2>
-                    <p>Use comandos de lógica de programação em inglês para guiar a capivara pelas ruas da cidade.</p>
-                </div>
-                <button class="play-btn" onclick="openGame('capycode')">Jogar Agora ▶</button>
+            <div class="menu-card">
+                <div class="game-icon">🏙️</div>
+                <h3>City Adventure</h3>
+                <p>O clássico tabuleiro interativo! Dirija o ônibus pelas ruas, colete os alunos e responda os desafios da cidade.</p>
+                <button class="play-btn" onclick="launchGame('cityadventure')">Jogar Agora ►</button>
             </div>
 
-            <div class="game-card">
-                <div>
-                    <div class="game-icon">🏙️</div>
-                    <h2>City Adventure</h2>
-                    <p>Um jogo de tabuleiro virtual interativo. Gire o dado, avance as casas e complete os desafios.</p>
-                </div>
-                <button class="play-btn" onclick="openGame('city-adventure')">Jogar Agora ▶</button>
+            <div class="menu-card">
+                <div class="game-icon">🗣️</div>
+                <h3>City Sounds</h3>
+                <p>Ouça atentamente a pronúncia descritiva e os efeitos sonoros dos locais em inglês e vença os testes de audição.</p>
+                <button class="play-btn" onclick="launchGame('citysounds')">Jogar Agora ►</button>
             </div>
 
-            <div class="game-card">
-                <div>
-                    <div class="game-icon">🗣️</div>
-                    <h2>City Sounds</h2>
-                    <p>Ouça atentamente a pronúncia nativa dos lugares da cidade em inglês e vença os desafios.</p>
-                </div>
-                <button class="play-btn" onclick="openGame('city-sounds')">Jogar Agora ▶</button>
+            <div class="menu-card">
+                <div class="game-icon">🏎️</div>
+                <h3>Pit Stop Challenge</h3>
+                <p>Seu combustível está acabando na pista rápida! Corra contra o tempo para traduzir comandos de mecânica e direções.</p>
+                <button class="play-btn" onclick="launchGame('pitstop')">Jogar Agora ►</button>
             </div>
 
-            <div class="game-card">
-                <div>
-                    <div class="game-icon">🏎️</div>
-                    <h2>Pit Stop Challenge</h2>
-                    <p>Pilote pela estrada coletando moedas. Use seu inglês para fazer o pit stop perfeito!</p>
-                </div>
-                <button class="play-btn" onclick="openGame('pit-stop')">Jogar Agora ▶</button>
+            <div class="menu-card">
+                <div class="game-icon">🚨</div>
+                <h3>Teletube Escape</h3>
+                <p>O robô está preso dentro do tubo sob a cidade! Traduza rapidamente as palavras antes que a pressão do tempo aumente.</p>
+                <button class="play-btn" onclick="launchGame('teletube')">Jogar Agora ►</button>
             </div>
-        </main>
-    </div>
 
-    <div id="screen-hangman" class="game-screen">
-        <h1 class="game-title">🔤 Hangman Challenge: City Places</h1>
-        <div class="main-container">
-            <div class="hint-box" id="hint-text">Dica: ...</div>
-            <div class="lives-box">Chances restantes: <span id="lives-count">6</span></div>
-            <div id="feedback-toast">WOW! ✔</div>
-            <div class="word-display" id="word-container"></div>
-            <div class="keyboard" id="keyboard-container"></div>
-        </div>
-
-        <div class="overlay" id="end-screen">
-            <h2 id="end-title">Resultado</h2>
-            <p id="end-desc">Mensagem informativa aqui.</p>
-            <button class="reset-btn" onclick="initHangmanGame()">Próxima Palavra 🔄</button>
+            <div class="menu-card">
+                <div class="game-icon">🔤</div>
+                <h3>City Hangman</h3>
+                <p>O famoso jogo da forca! Analise as dicas contextuais de arquitetura urbana e adivinhe as palavras secretas letra por letra.</p>
+                <button class="play-btn" onclick="launchGame('hangman')">Jogar Agora ►</button>
+            </div>
         </div>
     </div>
 
-    <div id="screen-capycode" class="game-screen"><div class="dev-placeholder"><h2>🦫 CapyCode</h2><p>Área de integração para o algoritmo da capivara.</p></div></div>
-    <div id="screen-city-adventure" class="game-screen"><div class="dev-placeholder"><h2>🏙️ City Adventure</h2><p>Espaço reservado para o Tabuleiro Virtual.</p></div></div>
-    <div id="screen-city-sounds" class="game-screen"><div class="dev-placeholder"><h2>🗣️ City Sounds</h2><p>Espaço reservado para o módulo de Áudio/Pronúncia.</p></div></div>
-    <div id="screen-pit-stop" class="game-screen"><div class="dev-placeholder"><h2>🏎️ Pit Stop Challenge</h2><p>Espaço reservado para o minijogo de corrida.</p></div></div>
+    <div id="screen-game-engine" class="screen">
+        <div class="game-header">
+            <button class="btn-back" onclick="backToMenu()">⬅️ Voltar ao Menu</button>
+            <div class="game-title" id="runtime-game-title">Nome do Jogo</div>
+        </div>
 
-    <footer>
-        <p>Criado para turmas de Inglês • Acesso de qualquer dispositivo</p>
-    </footer>
+        <div id="runtime-game-content" style="width:100%; display:flex; flex-direction:column; align-items:center;"></div>
+    </div>
+
+    <div class="overlay" id="end-screen">
+        <h1 id="end-title" style="font-size: 38px; margin-bottom: 12px; font-weight: bold;">Resultado</h1>
+        <p id="end-desc" style="font-size: 18px; color: #94a3b8; max-width: 500px; margin-bottom: 20px;"></p>
+        <button class="restart-btn" onclick="backToMenu()">Voltar para a Plataforma 🏠</button>
+    </div>
 
     <script>
-        // --- SISTEMA NAVEGAÇÃO SPA ---
-        function openGame(gameKey) {
-            document.getElementById('main-menu').style.display = 'none';
-            document.getElementById('global-back-btn').style.display = 'block';
-            
-            // Oculta todas as telas primeiro
-            document.querySelectorAll('.game-screen').forEach(screen => screen.style.display = 'none');
-            
-            // Ativa a tela correta
-            const activeScreen = document.getElementById(`screen-${gameKey}`);
-            if(activeScreen) activeScreen.style.display = 'flex';
-
-            // Inicializações específicas
-            if (gameKey === 'hangman') {
-                initHangmanGame();
-            }
-        }
-
-        function goToMenu() {
-            document.querySelectorAll('.game-screen').forEach(screen => screen.style.display = 'none');
-            document.getElementById('end-screen').style.display = 'none';
-            document.getElementById('global-back-btn').style.display = 'none';
-            document.getElementById('main-menu').style.display = 'block';
-        }
-
-        // ==================== ENGINE: JOGO DA FORCA (HANGMAN) ====================
-        const placesDatabase = [
-            { word: "BAKERY", hint: "Onde compramos pães e doces deliciosos de manhã 🥖" },
-            { word: "SCHOOL", hint: "O local para onde vamos estudar, aprender e ver amigos 🏫" },
-            { word: "CHURCH", hint: "Lugar para orações, reflexões e celebrações religiosas ⛪" },
-            { word: "HOSPITAL", hint: "Lugar com médicos e enfermeiros para cuidar da saúde 🏥" },
-            { word: "GYM", hint: "Onde as pessoas vão malhar, correr e fazer exercícios 🏋️" },
-            { word: "PORT", hint: "Local à beira-mar onde os grandes navios atracam 🚢" },
-            { word: "DRUGSTORE", hint: "Onde vamos comprar remédios quando estamos doentes 💊" },
-            { word: "BUS STOP", hint: "Ponto na calçada onde esperamos o ônibus chegar 🚌" }
+        // CONFIGURAÇÕES E ESTADOS GLOBAIS
+        let activeGameMode = "";
+        const cityMatrix = [
+            ['H', 'R', 'R', 'R', 'T', 'R', 'O', 'G', 'G'],
+            ['M', 'M', 'M', 'M', 'M', 'R', 'M', 'M', 'M'],
+            ['M', 'S', 'R', 'T', 'M', 'R', 'R', 'S', 'M'],
+            ['M', 'R', 'M', 'R', 'M', 'M', 'M', 'R', 'M'],
+            ['M', 'R', 'M', 'R', 'R', 'S', 'R', 'T', 'M'], 
+            ['M', 'R', 'M', 'M', 'M', 'M', 'M', 'M', 'M'], 
+            ['M', 'R', 'R', 'T', 'R', 'R', 'R', 'R', 'R'], 
+            ['M', 'M', 'M', 'M', 'M', 'O', 'M', 'M', 'R'],
+            ['M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'E']  
         ];
+        const busStopQuizzes = {
+            "2,1": { question: "Where do you buy fresh bread and cakes?<br><span style='color: #94a3b8; font-size: 12px;'>(Onde você compra pão fresco?)</span>", correct: "Bakery 🥖", choices: ["Library 📚", "Bakery 🥖", "Hospital 🏥"] },
+            "2,7": { question: "Where do you go when you are very sick?<br><span style='color: #94a3b8; font-size: 12px;'>(Para onde vai quando está doente?)</span>", correct: "Hospital 🏥", choices: ["Hospital 🏥", "Park 🌳", "Airport ✈️"] },
+            "4,5": { question: "Where can you buy medicines and vitamins?<br><span style='color: #94a3b8; font-size: 12px;'>(Onde compra remédios?)</span>", correct: "Drugstore 💊", choices: ["Bank 🏦", "Drugstore 💊", "School 🏫"] },
+            "6,3": { question: "Where do people go to pray on Sundays?<br><span style='color: #94a3b8; font-size: 12px;'>(Onde pessoas vão rezar?)</span>", correct: "Church ⛪", choices: ["Supermarket 🛒", "Church ⛪", "Gym 🏋️"] }
+        };
 
-        let selectedPlace;
-        let secretWord = "";
-        let guessedLetters = [];
-        let remainingLives = 6;
-        const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+        // Estado interno do Jogo do Ônibus
+        let busPos = { x: 0, y: 0 }, fuel = 30, stars = 0, studentsSaved = 0;
+        let studentPositions = [], answeredStops = [], lockControls = false, trafficLightsGreen = true, lightTimerId = null;
 
-        function initHangmanGame() {
-            selectedPlace = placesDatabase[Math.floor(Math.random() * placesDatabase.length)];
-            secretWord = selectedPlace.word;
-            guessedLetters = [];
-            remainingLives = 6;
+        // Estado interno do Jogo da Forca
+        let hangmanWord = "HOSPITAL", hangmanDisplay = [], hangmanAttempts = 5;
 
-            if(secretWord.includes(" ")) {
-                guessedLetters.push(" ");
-            }
-
-            document.getElementById('hint-text').innerText = `Dica: ${selectedPlace.hint}`;
-            document.getElementById('lives-count').innerText = remainingLives;
+        // DIRECIONADOR DOS BOTÕES "JOGAR AGORA"
+        function launchGame(gameKey) {
+            activeGameMode = gameKey;
+            const titleElement = document.getElementById('runtime-game-title');
+            const container = document.getElementById('runtime-game-content');
+            container.innerHTML = ""; // Limpa a memória da tela anterior
+            
             document.getElementById('end-screen').style.display = 'none';
-            document.getElementById('feedback-toast').classList.remove('show');
+            switchScreen('screen-game-engine');
 
-            renderWordSlots();
-            renderKeyboard();
-        }
-
-        function renderWordSlots() {
-            const container = document.getElementById('word-container');
-            container.innerHTML = "";
-
-            for (let char of secretWord) {
-                let slot = document.createElement('div');
-                if (char === " ") {
-                    slot.innerHTML = "&nbsp;&nbsp;";
-                    slot.style.borderBottom = "none";
-                } else if (guessedLetters.includes(char)) {
-                    slot.innerText = char;
-                    slot.classList.add('letter-slot');
-                } else {
-                    slot.innerText = "";
-                    slot.classList.add('letter-slot');
-                }
-                container.appendChild(slot);
+            if (gameKey === 'capycode') {
+                titleElement.innerText = "CapyCode: Rumo ao Parque";
+                container.innerHTML = `
+                    <div class="generic-play-zone">
+                        <p style="text-align:center; line-height:1.6">Escreva a sequência de comandos em inglês para a Capivara andar até o parque. Use <b>RIGHT</b>, <b>LEFT</b>, <b>UP</b> ou <b>DOWN</b> separados por espaço.</p>
+                        <div style="font-size:32px; margin:15px 0;">🦦 ➔ ➔ 🌳</div>
+                        <input type="text" id="capy-cmd" class="game-input" placeholder="Ex: RIGHT RIGHT DOWN">
+                        <button class="btn-submit" onclick="evalCapyCode()">Compilar Código 🚀</button>
+                    </div>`;
+            } 
+            else if (gameKey === 'cityadventure') {
+                titleElement.innerText = "City Adventure";
+                container.innerHTML = `
+                    <div class="stats-bar">
+                        <span>⛽ Gasolina: <span id="fuel-display" class="fuel-txt">30</span></span>
+                        <span>⭐ Estrelas: <span id="stars-display" class="star-txt">0</span></span>
+                        <span>👤 Alunos: <span id="pass-display" class="pass-txt">0/4</span></span>
+                    </div>
+                    <div style="display:flex; gap:25px; flex-wrap:wrap; justify-content:center; width:100%;">
+                        <div class="map-wrapper">
+                            <div class="map-grid" id="map-grid-element"></div>
+                            <div class="actor" id="bus-player">🚌</div>
+                        </div>
+                        <div class="side-panel">
+                            <div class="event-log" id="log-box">Use as setas do teclado ou os botões de navegação!</div>
+                            <div class="nav-buttons">
+                                <button class="nav-btn" style="grid-column: 2" onclick="moveBus(0, -1)">⬆️</button>
+                                <button class="nav-btn" style="grid-column: 1; grid-row: 2" onclick="moveBus(-1, 0)">⬅️</button>
+                                <button class="nav-btn" style="grid-column: 2; grid-row: 2" onclick="moveBus(0, 1)">⬇️</button>
+                                <button class="nav-btn" style="grid-column: 3; grid-row: 2" onclick="moveBus(1, 0)">➡️</button>
+                            </div>
+                            <div class="quiz-box" id="quiz-container">
+                                <div style="font-size: 11px; color: #f59e0b; font-weight: bold;">⛽ REFUEL QUIZ!</div>
+                                <div id="question-text" style="font-weight: bold; margin: 5px 0;"></div>
+                                <div id="options-container" style="display: flex; flex-direction: column; gap: 6px;"></div>
+                            </div>
+                        </div>
+                    </div>`;
+                initBusGame();
+            } 
+            else if (gameKey === 'citysounds') {
+                titleElement.innerText = "City Sounds";
+                container.innerHTML = `
+                    <div class="generic-play-zone">
+                        <p style="font-weight:bold;">Identifique o local da cidade pelo som ambiente traduzido:</p>
+                        <div style="font-size:24px; color:#4ade80; margin:15px 0;">"Ding-dong! 🔔 Sons de bancos de madeira e cânticos..."</div>
+                        <input type="text" id="sound-ans" class="game-input" placeholder="Nome em inglês">
+                        <button class="btn-submit" onclick="evalCitySounds()">Verificar Pronúncia 🗣️</button>
+                    </div>`;
+            } 
+            else if (gameKey === 'pitstop') {
+                titleElement.innerText = "Pit Stop Challenge";
+                container.innerHTML = `
+                    <div class="generic-play-zone">
+                        <p>Sinal de alerta! Traduza o termo técnico automotivo para fazer o pit stop: <b>"Gas Station"</b></p>
+                        <input type="text" id="pit-ans" class="game-input" placeholder="Tradução em português">
+                        <button class="btn-submit" onclick="evalPitStop()">Trocar Pneus e Abastecer 🏎️</button>
+                    </div>`;
+            } 
+            else if (gameKey === 'teletube') {
+                titleElement.innerText = "Teletube Escape";
+                container.innerHTML = `
+                    <div class="generic-play-zone">
+                        <p>O Robô está preso! Traduza a palavra rápida para liberá-lo do tubo: <b style="color:#f87171">"LIBRARY"</b></p>
+                        <input type="text" id="tube-ans" class="game-input" placeholder="Significado em português">
+                        <button class="btn-submit" onclick="evalTeletube()">Puxar Alavanca 🚨</button>
+                    </div>`;
+            } 
+            else if (gameKey === 'hangman') {
+                titleElement.innerText = "City Hangman";
+                container.innerHTML = `
+                    <div class="generic-play-zone">
+                        <p>Dica: Local onde médicos e enfermeiras cuidam da saúde (In English).</p>
+                        <div id="hangman-word-box" class="word-display">_ _ _ _ _ _ _ _</div>
+                        <p style="font-size:12px; color:#94a3b8">Tentativas restantes: <span id="hangman-lives">5</span></p>
+                        <input type="text" id="hangman-letter" class="game-input" maxlength="1" style="width:60px">
+                        <button class="btn-submit" onclick="evalHangman()">Testar Letra 🔤</button>
+                    </div>`;
+                initHangman();
             }
         }
 
-        function renderKeyboard() {
-            const container = document.getElementById('keyboard-container');
-            container.innerHTML = "";
+        function switchScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
 
-            alphabet.forEach(letter => {
-                let btn = document.createElement('button');
-                btn.className = 'key';
-                
-                let letterSpan = document.createElement('span');
-                letterSpan.innerText = letter;
-                btn.appendChild(letterSpan);
+        function backToMenu() {
+            activeGameMode = "";
+            if(lightTimerId) clearInterval(lightTimerId);
+            switchScreen('screen-menu');
+        }
 
-                let statusSpan = document.createElement('span');
-                statusSpan.className = 'key-status';
-                statusSpan.innerText = "";
-                btn.appendChild(statusSpan);
+        // LÓGICA ENGINE: JOGO 1 (CAPYCODE)
+        function evalCapyCode() {
+            let userIn = document.getElementById('capy-cmd').value.toUpperCase().trim();
+            if(userIn.includes("RIGHT") && userIn.includes("DOWN")) {
+                showEndGame(true, "Parabéns! Sua sequência lógica funcionou e a Capivara chegou com segurança!");
+            } else {
+                showEndGame(false, "Código incorreto! A Capivara bateu nos arbustos do cenário.");
+            }
+        }
 
-                btn.onclick = () => handleGuess(letter, btn, statusSpan);
-                container.appendChild(btn);
+        // LÓGICA ENGINE: JOGO 2 (CITY ADVENTURE - ORIGINAL)
+        function initBusGame() {
+            busPos = { x: 0, y: 0 }; fuel = 30; stars = 0; studentsSaved = 0; answeredStops = []; lockControls = false; trafficLightsGreen = true;
+            studentPositions = [{x: 3, y: 0, active: true}, {x: 5, y: 2, active: true}, {x: 1, y: 3, active: true}, {x: 3, y: 6, active: true}];
+            buildCity();
+            if(lightTimerId) clearInterval(lightTimerId);
+            lightTimerId = setInterval(() => {
+                if(activeGameMode === 'cityadventure') { trafficLightsGreen = !trafficLightsGreen; buildCity(); }
+            }, 4000);
+        }
+
+        function buildCity() {
+            const grid = document.getElementById('map-grid-element');
+            if(!grid) return; grid.innerHTML = "";
+            for (let r = 0; r < 9; r++) {
+                for (let c = 0; c < 9; c++) {
+                    const cell = document.createElement('div'); cell.className = "cell"; const type = cityMatrix[r][c];
+                    if (type === 'R' || type === 'H' || type === 'E') cell.style.backgroundColor = "#475569";
+                    if (type === 'H') cell.innerText = "🏡"; if (type === 'E') cell.innerText = "🏫";
+                    if (type === 'O') { cell.classList.add('obstacle'); cell.innerText = "🚧"; }
+                    if (type === 'S') { cell.classList.add('bus-stop'); cell.innerText = "🚏"; }
+                    if (type === 'T') cell.classList.add(trafficLightsGreen ? 'traffic-light-green' : 'traffic-light-red');
+                    if (type === 'T') cell.innerText = trafficLightsGreen ? "🟢" : "🔴";
+                    if (type === 'G') cell.classList.add('building-darkgreen');
+                    if (type === 'M') cell.classList.add('building-green');
+                    let student = studentPositions.find(s => s.x === c && s.y === r && s.active);
+                    if (student) { let s = document.createElement('span'); s.innerText = "👤"; s.style.position="absolute"; cell.appendChild(s); }
+                    grid.appendChild(cell);
+                }
+            }
+            const bus = document.getElementById('bus-player');
+            if(bus) { bus.style.top = (busPos.y * 54 + 14) + "px"; bus.style.left = (busPos.x * 54 + 14) + "px"; }
+        }
+
+        function moveBus(dx, dy) {
+            if (lockControls || fuel <= 0) return;
+            let tx = busPos.x + dx, ty = busPos.y + dy;
+            if (tx < 0 || tx >= 9 || ty < 0 || ty >= 9) return;
+            if (['M','G','O'].includes(cityMatrix[ty][tx])) return;
+            if (cityMatrix[ty][tx] === 'T' && !trafficLightsGreen) fuel -= 3;
+            busPos.x = tx; busPos.y = ty; fuel--;
+            document.getElementById('fuel-display').innerText = fuel; buildCity();
+            let st = studentPositions.find(s => s.x === busPos.x && s.y === busPos.y && s.active);
+            if (st) { st.active = false; studentsSaved++; stars += 15; document.getElementById('pass-display').innerText = `${studentsSaved}/4`; document.getElementById('stars-display').innerText = stars; }
+            if (cityMatrix[ty][tx] === 'S') { let k = `${ty},${tx}`; if (!answeredStops.includes(k)) launchBusQuiz(k); }
+            if (fuel <= 0) showEndGame(false, "Fim de combustível na avenida!");
+            if (cityMatrix[ty][tx] === 'E') showEndGame(studentsSaved === 4, studentsSaved === 4 ? "Sucesso total na entrega!" : "Você deixou alunos para trás.");
+        }
+
+        function launchBusQuiz(k) {
+            lockControls = true; const q = busStopQuizzes[k]; if(!q) return;
+            const container = document.getElementById('quiz-container'); container.style.display = 'flex';
+            document.getElementById('question-text').innerHTML = q.question;
+            const opts = document.getElementById('options-container'); opts.innerHTML = "";
+            q.choices.forEach(c => {
+                let btn = document.createElement('button'); btn.className = 'option-btn'; btn.innerText = c;
+                btn.onclick = () => {
+                    if(c === q.correct) { fuel += 12; stars += 10; } else { fuel -= 4; }
+                    document.getElementById('fuel-display').innerText = fuel;
+                    document.getElementById('stars-display').innerText = stars;
+                    answeredStops.push(k); container.style.display = 'none'; lockControls = false;
+                };
+                opts.appendChild(btn);
             });
         }
 
-        function handleGuess(letter, button, statusElement) {
-            if (guessedLetters.includes(letter) || remainingLives <= 0) return;
+        // LÓGICA ENGINE: JOGO 3 (CITY SOUNDS)
+        function evalCitySounds() {
+            let ans = document.getElementById('sound-ans').value.toLowerCase().trim();
+            if(ans === "church") { showEndGame(true, "Excelente! Você identificou a Igreja (Church) pelo som!"); }
+            else { showEndGame(false, "Incorreto! O som de sinos e cânticos pertence à 'Church'."); }
+        }
 
-            guessedLetters.push(letter);
-            button.disabled = true;
+        // LÓGICA ENGINE: JOGO 4 (PIT STOP)
+        function evalPitStop() {
+            let ans = document.getElementById('pit-ans').value.toLowerCase().trim();
+            if(ans.includes("posto") || ans.includes("combustivel")) { showEndGame(true, "Pit stop concluído com precisão cirúrgica de Fórmula 1!"); }
+            else { showEndGame(false, "Pit stop lento! Gas Station significa Posto de Gasolina."); }
+        }
 
-            if (secretWord.includes(letter)) {
-                button.classList.add('correct');
-                statusElement.innerText = "✔";
-                triggerWowEffect();
-                renderWordSlots();
-                checkWin();
-            } else {
-                button.classList.add('wrong');
-                statusElement.innerText = "❌";
-                remainingLives--;
-                document.getElementById('lives-count').innerText = remainingLives;
-                checkLose();
+        // LÓGICA ENGINE: JOGO 5 (TELETUBE)
+        function evalTeletube() {
+            let ans = document.getElementById('tube-ans').value.toLowerCase().trim();
+            if(ans === "biblioteca") { showEndGame(true, "Perfeito! A comporta abriu e o robô escapou ileso!"); }
+            else { showEndGame(false, "Pressão máxima! Library significa Biblioteca."); }
+        }
+
+        // LÓGICA ENGINE: JOGO 6 (HANGMAN - FORCA)
+        function initHangman() {
+            hangmanDisplay = ["_", "_", "_", "_", "_", "_", "_", "_"];
+            hangmanAttempts = 5;
+        }
+        function evalHangman() {
+            let letter = document.getElementById('hangman-letter').value.toUpperCase().trim();
+            document.getElementById('hangman-letter').value = "";
+            if(!letter) return;
+            let hit = false;
+            for(let i=0; i<hangmanWord.length; i++) {
+                if(hangmanWord[i] === letter) { hangmanDisplay[i] = letter; hit = true; }
             }
-        }
-
-        function triggerWowEffect() {
-            const toast = document.getElementById('feedback-toast');
-            toast.classList.add('show');
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 600);
-        }
-
-        function checkWin() {
-            const won = secretWord.split("").every(char => guessedLetters.includes(char));
-            if (won) {
-                setTimeout(() => {
-                    showEndScreen("🎉 PARABÉNS! 🎉", `Você descobriu a palavra "${secretWord}" com sucesso!`, "#10ac84");
-                }, 500);
+            document.getElementById('hangman-word-box').innerText = hangmanDisplay.join(" ");
+            if(!hit) {
+                hangmanAttempts--;
+                document.getElementById('hangman-lives').innerText = hangmanAttempts;
             }
+            if(!hangmanDisplay.includes("_")) showEndGame(true, "Vitória na Forca! A palavra urbana secreta era HOSPITAL.");
+            if(hangmanAttempts <= 0) showEndGame(false, "Game Over na Forca! A palavra urbana era HOSPITAL.");
         }
 
-        function checkLose() {
-            if (remainingLives <= 0) {
-                setTimeout(() => {
-                    showEndScreen("☠️ GAME OVER ☠️", `Ficou sem chances! A palavra secreta era: "${secretWord}".`, "#ff5252");
-                }, 500);
-            }
-        }
-
-        function showEndScreen(title, text, color) {
+        // CONTROLADOR DE EXIBIÇÃO DE FIM DE JOGO
+        function showEndGame(isWin, msg) {
             const screen = document.getElementById('end-screen');
-            const titleEl = document.getElementById('end-title');
-            const descEl = document.getElementById('end-desc');
-
-            titleEl.innerText = title;
-            titleEl.style.color = color;
-            descEl.innerText = text;
+            document.getElementById('end-title').innerText = isWin ? "🎉 EXCELENTE!" : "💥 GAME OVER";
+            document.getElementById('end-title').style.color = isWin ? "#4ade80" : "#f87171";
+            document.getElementById('end-desc').innerText = msg;
             screen.style.display = 'flex';
         }
+
+        // CAPTURA KEYDOWN DE FORMA SEGURA APENAS SE ESTIVER NO MAPA
+        window.addEventListener('keydown', (e) => {
+            if (activeGameMode === 'cityadventure') {
+                if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
+                    e.preventDefault();
+                    if(e.key === "ArrowUp") moveBus(0, -1);
+                    if(e.key === "ArrowDown") moveBus(0, 1);
+                    if(e.key === "ArrowLeft") moveBus(-1, 0);
+                    if(e.key === "ArrowRight") moveBus(1, 0);
+                }
+            }
+        });
     </script>
 </body>
 </html>
